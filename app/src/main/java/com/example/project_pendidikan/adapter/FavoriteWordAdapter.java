@@ -16,15 +16,20 @@ import java.util.List;
 
 public class FavoriteWordAdapter extends RecyclerView.Adapter<FavoriteWordAdapter.FavoriteWordViewHolder> {
     private List<FavoriteWord> favoriteWords = new ArrayList<>();
-    private OnItemClickListener listener;
+    private final OnItemClickListener onItemClickListener;
+    private final OnDeleteClickListener onDeleteClickListener;
 
     public interface OnItemClickListener {
         void onItemClick(FavoriteWord word);
+    }
+
+    public interface OnDeleteClickListener {
         void onDeleteClick(FavoriteWord word);
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
+    public FavoriteWordAdapter(OnItemClickListener onItemClickListener, OnDeleteClickListener onDeleteClickListener) {
+        this.onItemClickListener = onItemClickListener;
+        this.onDeleteClickListener = onDeleteClickListener;
     }
 
     @NonNull
@@ -47,17 +52,8 @@ public class FavoriteWordAdapter extends RecyclerView.Adapter<FavoriteWordAdapte
             holder.textViewPhonetic.setVisibility(View.GONE);
         }
 
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onItemClick(favoriteWord);
-            }
-        });
-
-        holder.textViewDelete.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onDeleteClick(favoriteWord);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> onItemClickListener.onItemClick(favoriteWord));
+        holder.textViewDelete.setOnClickListener(v -> onDeleteClickListener.onDeleteClick(favoriteWord));
     }
 
     @Override

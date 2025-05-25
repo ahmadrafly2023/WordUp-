@@ -1,9 +1,10 @@
 package com.example.project_pendidikan;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -13,6 +14,8 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +46,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DashboardActivity extends AppCompatActivity {
-    private static final int REQUEST_CODE_FAVORITES = 1;
+    private ActivityResultLauncher<Intent> favoritesLauncher;
 
     private TextInputEditText editTextSearch;
     private CardView cardViewResult;
@@ -63,56 +66,105 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        // Initialize database and executor
-        database = AppDatabase.getInstance(this);
-        executorService = Executors.newSingleThreadExecutor();
-
-        // Setup toolbar
+        // Initialize views
         MaterialToolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
 
-        // Initialize views
+        // Initialize activity result launcher
+        favoritesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                    String wordToSearch = result.getData().getStringExtra("WORD_TO_SEARCH");
+                    if (wordToSearch != null) {
+                        editTextSearch.setText(wordToSearch);
+                        searchWord(wordToSearch);
+                    }
+                }
+            });
+
         editTextSearch = findViewById(R.id.editTextSearch);
         cardViewResult = findViewById(R.id.cardViewResult);
         textViewWord = findViewById(R.id.textViewWord);
         textViewPhonetic = findViewById(R.id.textViewPhonetic);
-        recyclerViewDefinitions = findViewById(R.id.recyclerViewDefinitions);
         chipGroupSynonyms = findViewById(R.id.chipGroupSynonyms);
+        recyclerViewDefinitions = findViewById(R.id.recyclerViewDefinitions);
         fabFavorite = findViewById(R.id.fabFavorite);
 
-        // Setup FAB
-        fabFavorite.setOnClickListener(v -> toggleFavorite());
+        // Initialize database
+        database = AppDatabase.getInstance(this);
+        executorService = Executors.newSingleThreadExecutor();
 
-        // Setup RecyclerView
-        recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(this));
+        // Initialize adapter
         definitionAdapter = new DefinitionAdapter(new ArrayList<>());
+        recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewDefinitions.setAdapter(definitionAdapter);
 
-        // Initialize API service
+        // Initialize API client
         datamuseService = ApiClient.getClient().create(DatamuseService.class);
 
-        // Setup search
-        editTextSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    String word = editTextSearch.getText().toString().trim();
-                    if (!word.isEmpty()) {
-                        searchWord(word);
+        // Set up search
+        editTextSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                String word = editTextSearch.getText().toString();
+                searchWord(word);
+                return true;
+            }
+            return false;
+        });
+
+        // Set up favorite button
+        fabFavorite.setOnClickListener(v -> {
+            if (currentWord != null && !currentWord.isEmpty()) {
+                executorService.execute(() -> {
+                    try {
+                        FavoriteWord existingWord = database.favoriteWordDao().findByWord(currentWord);
+                        if (existingWord != null) {
+                            // Remove from favorites
+                            database.favoriteWordDao().delete(existingWord);
+                            runOnUiThread(() -> {
+                                fabFavorite.setImageResource(android.R.drawable.btn_star_big_off);
+                                Toast.makeText(DashboardActivity.this, "Removed from favorites", Toast.LENGTH_SHORT).show();
+                            });
+                        } else {
+                            // Add to favorites
+                            String definition = definitionAdapter.getDefinitions().isEmpty() ? "" : 
+                                    definitionAdapter.getDefinitions().get(0).getDefinition();
+                            FavoriteWord favoriteWord = new FavoriteWord(
+                                    currentWord,
+                                    definition,
+                                    textViewPhonetic.getText().toString());
+                            database.favoriteWordDao().insert(favoriteWord);
+                            runOnUiThread(() -> {
+                                fabFavorite.setImageResource(android.R.drawable.btn_star_big_on);
+                                Toast.makeText(DashboardActivity.this, "Added to favorites", Toast.LENGTH_SHORT).show();
+                            });
+                        }
+                    } catch (Exception e) {
+                        showError("Error updating favorites: " + e.getMessage());
                     }
-                    return true;
-                }
-                return false;
+                });
             }
         });
 
-        // Setup toolbar menu
-        toolbar.setOnMenuItemClickListener(new MaterialToolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                return onOptionsItemSelected(item);
+        // Set up toolbar menu item click
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_favorites) {
+                try {
+                    Intent intent = new Intent(DashboardActivity.this, FavoriteWordsActivity.class);
+                    favoritesLauncher.launch(intent);
+                    return true;
+                } catch (Exception e) {
+                    showError("Error opening favorites: " + e.getMessage());
+                    return false;
+                }
             }
+            return false;
         });
+
+        // Hide results initially
+        cardViewResult.setVisibility(View.GONE);
+        fabFavorite.hide();
     }
 
     @Override
@@ -133,22 +185,10 @@ public class DashboardActivity extends AppCompatActivity {
         } else if (itemId == R.id.action_favorites) {
             // Open favorites
             Intent intent = new Intent(this, FavoriteWordsActivity.class);
-            startActivityForResult(intent, REQUEST_CODE_FAVORITES);
+            favoritesLauncher.launch(intent);
             return true;
         }
         return false;
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_FAVORITES && resultCode == RESULT_OK && data != null) {
-            String wordToSearch = data.getStringExtra("WORD_TO_SEARCH");
-            if (wordToSearch != null) {
-                editTextSearch.setText(wordToSearch);
-                searchWord(wordToSearch);
-            }
-        }
     }
 
     private void toggleFavorite() {
@@ -252,8 +292,11 @@ public class DashboardActivity extends AppCompatActivity {
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         if (connectivityManager != null) {
-            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-            return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+            return capabilities != null && (
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
         }
         return false;
     }

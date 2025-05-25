@@ -3,7 +3,10 @@ package com.example.project_pendidikan;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +23,7 @@ import java.util.concurrent.Executors;
 
 public class FavoriteWordsActivity extends AppCompatActivity {
     private RecyclerView recyclerViewFavorites;
+    private TextView textViewEmpty;
     private FavoriteWordAdapter adapter;
     private AppDatabase database;
     private ExecutorService executorService;
@@ -29,54 +33,59 @@ public class FavoriteWordsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_words);
 
-        // Setup toolbar
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        // Initialize views
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setTitle("Favorite Words");
+        }
 
-        // Initialize database and executor
+        recyclerViewFavorites = findViewById(R.id.recyclerViewFavorites);
+        textViewEmpty = findViewById(R.id.textViewEmpty);
+
+        // Initialize database
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
 
         // Setup RecyclerView
-        recyclerViewFavorites = findViewById(R.id.recyclerViewFavorites);
-        recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new FavoriteWordAdapter();
-        recyclerViewFavorites.setAdapter(adapter);
-
-        // Setup click listeners
-        adapter.setOnItemClickListener(new FavoriteWordAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(FavoriteWord word) {
-                // Return to dashboard with the word to search
+        adapter = new FavoriteWordAdapter(
+            // On item click listener
+            word -> {
                 Intent intent = new Intent();
                 intent.putExtra("WORD_TO_SEARCH", word.getWord());
                 setResult(RESULT_OK, intent);
                 finish();
-            }
+            },
+            // On delete click listener
+            word -> executorService.execute(() -> {
+                database.favoriteWordDao().delete(word);
+            })
+        );
+        recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewFavorites.setAdapter(adapter);
 
-            @Override
-            public void onDeleteClick(FavoriteWord word) {
-                executorService.execute(() -> {
-                    database.favoriteWordDao().delete(word);
-                });
-            }
-        });
+        // Load favorite words
+        loadFavoriteWords();
+    }
 
-        // Observe favorite words
-        database.favoriteWordDao().getAllFavoriteWords().observe(this, new Observer<List<FavoriteWord>>() {
-            @Override
-            public void onChanged(List<FavoriteWord> favoriteWords) {
+    private void loadFavoriteWords() {
+        database.favoriteWordDao().getAllFavoriteWords().observe(this, favoriteWords -> {
+            if (favoriteWords != null && !favoriteWords.isEmpty()) {
                 adapter.setFavoriteWords(favoriteWords);
+                textViewEmpty.setVisibility(View.GONE);
+                recyclerViewFavorites.setVisibility(View.VISIBLE);
+            } else {
+                textViewEmpty.setVisibility(View.VISIBLE);
+                recyclerViewFavorites.setVisibility(View.GONE);
             }
         });
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            getOnBackPressedDispatcher().onBackPressed();
             return true;
         }
         return super.onOptionsItemSelected(item);
