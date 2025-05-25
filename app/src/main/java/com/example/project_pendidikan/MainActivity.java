@@ -50,6 +50,14 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Button buttonViewUsers = findViewById(R.id.buttonViewUsers);
+        buttonViewUsers.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, UserListActivity.class));
+            }
+        });
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -74,8 +82,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (databaseHelper.checkUser(email, password)) {
-            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-            // TODO: Navigate to main content activity
+            // Get user name for the dashboard
+            String userName = databaseHelper.getUserName(email);
+            
+            // Start dashboard activity
+            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+            intent.putExtra("USER_NAME", userName);
+            startActivity(intent);
+            finish(); // Close login activity
         } else {
             Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
         }
