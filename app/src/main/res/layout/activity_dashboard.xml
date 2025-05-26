@@ -8,14 +8,18 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:elevation="0dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/white"
             app:menu="@menu/top_app_bar"
-            app:title="@string/app_name" />
+            app:titleTextColor="@color/purple_500"
+            app:title="project_pendidikan" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -53,6 +57,11 @@
                         app:startIconTint="@color/purple_500"
                         app:boxStrokeColor="@color/purple_500"
                         app:hintTextColor="@color/purple_500"
+                        app:boxBackgroundColor="#F5F5F5"
+                        app:boxCornerRadiusTopStart="12dp"
+                        app:boxCornerRadiusTopEnd="12dp"
+                        app:boxCornerRadiusBottomStart="12dp"
+                        app:boxCornerRadiusBottomEnd="12dp"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                         <com.google.android.material.textfield.TextInputEditText
@@ -159,11 +168,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Recent Searches"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/black"
-                android:layout_marginTop="16dp"
-                android:layout_marginBottom="8dp" />
+                android:textColor="@color/purple_500"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="12dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewHistory"

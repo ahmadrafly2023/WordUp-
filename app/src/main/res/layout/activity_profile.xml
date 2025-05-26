@@ -6,7 +6,9 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/topAppBar"
@@ -15,7 +17,7 @@
             android:background="@color/white"
             app:navigationIcon="@drawable/ic_baseline_arrow_back_24"
             app:title="Profile"
-            app:titleTextColor="@color/black" />
+            app:titleTextColor="@color/purple_500" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -49,6 +51,13 @@
         android:hint="Full Name"
         app:boxStrokeColor="@color/purple_500"
         app:hintTextColor="@color/purple_500"
+        app:boxBackgroundColor="#F5F5F5"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:startIconDrawable="@drawable/ic_person"
+        app:startIconTint="@color/purple_500"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:layout_constraintTop_toBottomOf="@id/imageViewProfile">
 
@@ -67,6 +76,13 @@
         android:hint="Email"
         app:boxStrokeColor="@color/purple_500"
         app:hintTextColor="@color/purple_500"
+        app:boxBackgroundColor="#F5F5F5"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:startIconDrawable="@drawable/ic_email"
+        app:startIconTint="@color/purple_500"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:layout_constraintTop_toBottomOf="@id/nameInputLayout">
 
@@ -85,7 +101,15 @@
         android:hint="New Password (Optional)"
         app:boxStrokeColor="@color/purple_500"
         app:hintTextColor="@color/purple_500"
+        app:boxBackgroundColor="#F5F5F5"
+        app:boxCornerRadiusTopStart="12dp"
+        app:boxCornerRadiusTopEnd="12dp"
+        app:boxCornerRadiusBottomStart="12dp"
+        app:boxCornerRadiusBottomEnd="12dp"
+        app:startIconDrawable="@drawable/ic_lock"
+        app:startIconTint="@color/purple_500"
         app:passwordToggleEnabled="true"
+        app:endIconTint="@color/purple_500"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:layout_constraintTop_toBottomOf="@id/emailInputLayout">
 
@@ -103,7 +127,8 @@
         android:layout_marginTop="32dp"
         android:text="Save Changes"
         android:textSize="16sp"
-        app:cornerRadius="8dp"
+        app:cornerRadius="12dp"
+        android:backgroundTint="@color/purple_500"
         app:layout_constraintTop_toBottomOf="@id/passwordInputLayout" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
