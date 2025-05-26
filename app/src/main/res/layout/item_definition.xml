@@ -9,9 +9,8 @@
         android:id="@+id/textViewPartOfSpeech"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/purple_500"
         android:textStyle="italic"
-        android:textSize="14sp" />
+        android:textColor="@color/purple_500" />
 
     <TextView
         android:id="@+id/textViewDefinition"

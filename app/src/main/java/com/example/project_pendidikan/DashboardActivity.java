@@ -20,6 +20,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -30,11 +34,12 @@ import com.example.project_pendidikan.db.AppDatabase;
 import com.example.project_pendidikan.model.DatamuseWord;
 import com.example.project_pendidikan.model.Definition;
 import com.example.project_pendidikan.model.FavoriteWord;
-import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +72,26 @@ public class DashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_dashboard);
 
         // Initialize views
-        MaterialToolbar toolbar = findViewById(R.id.topAppBar);
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        
+        // Setup bottom navigation
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_nav_view);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.navigation_home) {
+                return true;
+            } else if (itemId == R.id.navigation_favorite) {
+                Intent favoriteIntent = new Intent(DashboardActivity.this, FavoriteWordsActivity.class);
+                favoritesLauncher.launch(favoriteIntent);
+                return true;
+            } else if (itemId == R.id.navigation_profile) {
+                Intent profileIntent = new Intent(DashboardActivity.this, ProfileActivity.class);
+                startActivity(profileIntent);
+                return true;
+            }
+            return false;
+        });
 
         // Initialize activity result launcher
         favoritesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
@@ -174,21 +197,17 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.action_logout) {
-            // Handle logout
-            Intent intent = new Intent(DashboardActivity.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            return true;
-        } else if (itemId == R.id.action_favorites) {
-            // Open favorites
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_favorites) {
             Intent intent = new Intent(this, FavoriteWordsActivity.class);
             favoritesLauncher.launch(intent);
             return true;
+        } else if (item.getItemId() == R.id.action_profile) {
+            Intent intent = new Intent(this, ProfileActivity.class);
+            startActivity(intent);
+            return true;
         }
-        return false;
+        return super.onOptionsItemSelected(item);
     }
 
     private void toggleFavorite() {
