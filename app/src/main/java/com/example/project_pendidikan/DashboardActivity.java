@@ -40,11 +40,15 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -62,8 +66,14 @@ public class DashboardActivity extends AppCompatActivity {
     private DefinitionAdapter definitionAdapter;
     private DatamuseService datamuseService;
     private FloatingActionButton fabFavorite;
+    private MaterialButton btnRefresh;
     private AppDatabase database;
     private ExecutorService executorService;
+    private Handler uiHandler;
+    
+    private static final int MSG_UPDATE_WORD_LIST = 1;
+    private static final int MSG_UPDATE_FAVORITE = 2;
+    private static final int MSG_SHOW_ERROR = 3;
     private String currentWord;
 
     @Override
@@ -74,7 +84,61 @@ public class DashboardActivity extends AppCompatActivity {
         // Initialize views
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        
+
+        // Initialize UI components
+        editTextSearch = findViewById(R.id.editTextSearch);
+        cardViewResult = findViewById(R.id.cardViewResult);
+        textViewWord = findViewById(R.id.textViewWord);
+        textViewPhonetic = findViewById(R.id.textViewPhonetic);
+        recyclerViewDefinitions = findViewById(R.id.recyclerViewDefinitions);
+        chipGroupSynonyms = findViewById(R.id.chipGroupSynonyms);
+        fabFavorite = findViewById(R.id.fabFavorite);
+        btnRefresh = findViewById(R.id.btnRefresh);
+
+        // Initialize database and services
+        database = AppDatabase.getInstance(this);
+        executorService = Executors.newSingleThreadExecutor();
+        datamuseService = ApiClient.getClient().create(DatamuseService.class);
+
+        // Setup refresh button
+        btnRefresh.setOnClickListener(v -> {
+            if (currentWord != null) {
+                searchWord(currentWord);
+            }
+        });
+        btnRefresh.setVisibility(View.GONE);
+
+        // Initialize RecyclerView
+        recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(this));
+        definitionAdapter = new DefinitionAdapter(new ArrayList<>());
+        recyclerViewDefinitions.setAdapter(definitionAdapter);
+
+        // Setup search input
+        editTextSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
+                String searchTerm = editTextSearch.getText().toString().trim();
+                if (!searchTerm.isEmpty()) {
+                    searchWord(searchTerm);
+                }
+                return true;
+            }
+            return false;
+        });
+
+        // Setup favorite button
+        fabFavorite.setOnClickListener(v -> toggleFavorite());
+        fabFavorite.hide();
+
+        // Initialize favorites launcher
+        favoritesLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        // Handle any updates needed after returning from favorites
+                    }
+                });
+
         // Setup bottom navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -116,74 +180,27 @@ public class DashboardActivity extends AppCompatActivity {
         // Initialize database
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
-
-        // Initialize adapter
-        definitionAdapter = new DefinitionAdapter(new ArrayList<>());
-        recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(this));
-        recyclerViewDefinitions.setAdapter(definitionAdapter);
-
-        // Initialize API client
-        datamuseService = ApiClient.getClient().create(DatamuseService.class);
-
-        // Set up search
-        editTextSearch.setOnEditorActionListener((v, actionId, event) -> {
-            if (actionId == EditorInfo.IME_ACTION_SEARCH ||
-                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
-                String word = editTextSearch.getText().toString();
-                searchWord(word);
-                return true;
-            }
-            return false;
-        });
-
-        // Set up favorite button
-        fabFavorite.setOnClickListener(v -> {
-            if (currentWord != null && !currentWord.isEmpty()) {
-                executorService.execute(() -> {
-                    try {
-                        FavoriteWord existingWord = database.favoriteWordDao().findByWord(currentWord);
-                        if (existingWord != null) {
-                            // Remove from favorites
-                            database.favoriteWordDao().delete(existingWord);
-                            runOnUiThread(() -> {
-                                fabFavorite.setImageResource(android.R.drawable.btn_star_big_off);
-                                Toast.makeText(DashboardActivity.this, "Removed from favorites", Toast.LENGTH_SHORT).show();
-                            });
-                        } else {
-                            // Add to favorites
-                            String definition = definitionAdapter.getDefinitions().isEmpty() ? "" : 
-                                    definitionAdapter.getDefinitions().get(0).getDefinition();
-                            FavoriteWord favoriteWord = new FavoriteWord(
-                                    currentWord,
-                                    definition,
-                                    textViewPhonetic.getText().toString());
-                            database.favoriteWordDao().insert(favoriteWord);
-                            runOnUiThread(() -> {
-                                fabFavorite.setImageResource(android.R.drawable.btn_star_big_on);
-                                Toast.makeText(DashboardActivity.this, "Added to favorites", Toast.LENGTH_SHORT).show();
-                            });
-                        }
-                    } catch (Exception e) {
-                        showError("Error updating favorites: " + e.getMessage());
-                    }
-                });
-            }
-        });
-
-        // Set up toolbar menu item click
-        toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_favorites) {
-                try {
-                    Intent intent = new Intent(DashboardActivity.this, FavoriteWordsActivity.class);
-                    favoritesLauncher.launch(intent);
-                    return true;
-                } catch (Exception e) {
-                    showError("Error opening favorites: " + e.getMessage());
-                    return false;
+        
+        // Initialize Handler for UI updates
+        uiHandler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_UPDATE_WORD_LIST:
+                        definitionAdapter.notifyDataSetChanged();
+                        break;
+                    case MSG_UPDATE_FAVORITE:
+                        int position = msg.arg1;
+                        boolean isFavorite = msg.arg2 == 1;
+                        updateFavoriteUI(position, isFavorite);
+                        break;
+                    case MSG_SHOW_ERROR:
+                        String error = (String) msg.obj;
+                        Toast.makeText(DashboardActivity.this, error, Toast.LENGTH_SHORT).show();
+                        break;
                 }
             }
-            return false;
-        });
+        };
 
         // Hide results initially
         cardViewResult.setVisibility(View.GONE);
@@ -211,43 +228,79 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void toggleFavorite() {
-        if (currentWord == null) return;
+        if (currentWord == null || currentWord.isEmpty()) {
+            return;
+        }
 
         executorService.execute(() -> {
-            FavoriteWord existingWord = database.favoriteWordDao().findByWord(currentWord);
-            if (existingWord != null) {
-                // Remove from favorites
-                database.favoriteWordDao().delete(existingWord);
-                runOnUiThread(() -> {
-                    fabFavorite.setImageResource(android.R.drawable.btn_star_big_off);
-                    Toast.makeText(this, "Removed from favorites", Toast.LENGTH_SHORT).show();
-                });
-            } else {
-                // Add to favorites
-                List<Definition> definitions = definitionAdapter.getDefinitions();
-            String definition = definitions != null && !definitions.isEmpty() ? definitions.get(0).getDefinition() : "";
-                String phonetic = textViewPhonetic.getVisibility() == View.VISIBLE ? 
-                        textViewPhonetic.getText().toString() : "";
-                FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic);
-                database.favoriteWordDao().insert(newFavorite);
-                runOnUiThread(() -> {
-                    fabFavorite.setImageResource(android.R.drawable.btn_star_big_on);
-                    Toast.makeText(this, "Added to favorites", Toast.LENGTH_SHORT).show();
-                });
+            try {
+                FavoriteWord existingFavorite = database.favoriteWordDao().findByWord(currentWord);
+                if (existingFavorite != null) {
+                    // Remove from favorites
+                    database.favoriteWordDao().delete(existingFavorite);
+                    runOnUiThread(() -> {
+                        fabFavorite.setImageResource(android.R.drawable.btn_star_big_off);
+                        Toast.makeText(DashboardActivity.this, "Removed from favorites", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    // Add to favorites
+                    String definition = "";
+                    if (definitionAdapter != null && !definitionAdapter.getDefinitions().isEmpty()) {
+                        definition = definitionAdapter.getDefinitions().get(0).getDefinition();
+                    }
+                    String phonetic = textViewPhonetic.getVisibility() == View.VISIBLE ? 
+                            textViewPhonetic.getText().toString() : "";
+                    
+                    FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic);
+                    database.favoriteWordDao().insert(newFavorite);
+                    runOnUiThread(() -> {
+                        fabFavorite.setImageResource(android.R.drawable.btn_star_big_on);
+                        Toast.makeText(DashboardActivity.this, "Added to favorites", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } catch (Exception e) {
+                showError("Error updating favorites: " + e.getMessage());
             }
         });
     }
 
     private void searchWord(String word) {
         if (word == null || word.trim().isEmpty()) {
-            showError("Please enter a word to search");
             return;
         }
 
+        currentWord = word.trim();
+
         if (!isNetworkAvailable()) {
-            showError("No internet connection. Please check your network settings.");
+            showError("No internet connection");
+            btnRefresh.setVisibility(View.VISIBLE);
             return;
         }
+
+        btnRefresh.setVisibility(View.GONE);
+
+        // Show loading state
+        cardViewResult.setVisibility(View.GONE);
+        fabFavorite.hide();
+
+        // Call API
+        Call<List<DatamuseWord>> call = datamuseService.getRelatedWords(word, "d");
+        call.enqueue(new Callback<List<DatamuseWord>>() {
+            @Override
+            public void onResponse(Call<List<DatamuseWord>> call, Response<List<DatamuseWord>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    displayWordDetails(word, response.body());
+                    getSynonyms(word);
+                } else {
+                    showError("No definitions found");
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<DatamuseWord>> call, Throwable t) {
+                showError("Error: " + t.getMessage());
+            }
+        });
 
         // Show loading state
         cardViewResult.setVisibility(View.GONE);
@@ -325,7 +378,17 @@ public class DashboardActivity extends AppCompatActivity {
             Toast.makeText(DashboardActivity.this, message, Toast.LENGTH_LONG).show();
             cardViewResult.setVisibility(View.GONE);
             fabFavorite.hide();
+            
+            if (message.contains("internet") && currentWord != null && !currentWord.isEmpty()) {
+                btnRefresh.setVisibility(View.VISIBLE);
+            } else {
+                btnRefresh.setVisibility(View.GONE);
+            }
         });
+    }
+
+    private void updateFavoriteUI(int position, boolean isFavorite) {
+        definitionAdapter.notifyItemChanged(position);
     }
 
     private void displayWordDetails(String searchWord, List<DatamuseWord> words) {
