@@ -223,13 +223,12 @@ public class DashboardActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_favorites) {
-            Intent intent = new Intent(this, FavoriteWordsActivity.class);
-            favoritesLauncher.launch(intent);
-            return true;
-        } else if (item.getItemId() == R.id.action_profile) {
-            Intent intent = new Intent(this, ProfileActivity.class);
+        if (item.getItemId() == R.id.action_logout) {
+            // Navigate back to MainActivity
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

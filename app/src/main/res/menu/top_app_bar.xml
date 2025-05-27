@@ -2,15 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_favorites"
-        android:title="Favorites"
-        android:icon="@android:drawable/btn_star_big_on"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_profile"
-        android:title="Profile"
-        android:icon="@drawable/ic_baseline_person_24"
-        android:actionLayout="@style/ToolbarMenuItemStyle"
-        android:paddingEnd="16dp"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/action_logout"
+        android:title="Logout"
+        android:icon="@android:drawable/ic_lock_power_off"
+        app:showAsAction="always" />
 </menu>
