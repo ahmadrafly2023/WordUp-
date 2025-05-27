@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            android:textColor="@color/green_500"
             android:layout_toStartOf="@id/textViewDelete"
             android:layout_alignParentStart="true" />
 
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:text="×"
             android:textSize="24sp"
-            android:textColor="@color/purple_500"
+            android:textColor="@color/green_500"
             android:padding="8dp"
             android:layout_alignParentEnd="true" />
 
@@ -39,7 +39,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/textViewWord"
-            android:textColor="@color/purple_500"
+            android:textColor="@color/green_500"
             android:textStyle="italic"
             android:layout_marginTop="4dp" />
 

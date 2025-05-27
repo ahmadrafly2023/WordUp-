@@ -14,7 +14,7 @@
         android:layout_height="120dp"
         android:layout_marginTop="48dp"
         android:src="@drawable/ic_book"
-        android:tint="@color/purple_500"
+        android:tint="@color/green_500"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -65,11 +65,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Full Name"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/purple_500"
+                app:boxStrokeColor="@color/green_500"
+                app:hintTextColor="@color/green_500"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:startIconDrawable="@drawable/ic_person"
-                app:startIconTint="@color/purple_500">
+                app:startIconTint="@color/green_500">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextName"
@@ -84,11 +84,11 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Email"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/purple_500"
+                app:boxStrokeColor="@color/green_500"
+                app:hintTextColor="@color/green_500"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:startIconDrawable="@drawable/ic_email"
-                app:startIconTint="@color/purple_500">
+                app:startIconTint="@color/green_500">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextEmailRegister"
@@ -103,12 +103,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Password"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/purple_500"
+                app:boxStrokeColor="@color/green_500"
+                app:hintTextColor="@color/green_500"
                 app:passwordToggleEnabled="true"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:startIconDrawable="@drawable/ic_lock"
-                app:startIconTint="@color/purple_500">
+                app:startIconTint="@color/green_500">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextPasswordRegister"
@@ -123,12 +123,12 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Confirm Password"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/purple_500"
+                app:boxStrokeColor="@color/green_500"
+                app:hintTextColor="@color/green_500"
                 app:passwordToggleEnabled="true"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:startIconDrawable="@drawable/ic_lock"
-                app:startIconTint="@color/purple_500">
+                app:startIconTint="@color/green_500">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextConfirmPassword"
@@ -155,7 +155,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Already have an account? Login here"
-        android:textColor="@color/purple_500"
+        android:textColor="@color/green_500"
         android:textSize="14sp"
         app:layout_constraintTop_toBottomOf="@id/registerCard"
         app:layout_constraintStart_toStartOf="parent"

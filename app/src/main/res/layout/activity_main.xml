@@ -15,7 +15,7 @@
         android:layout_height="120dp"
         android:layout_marginTop="48dp"
         android:src="@drawable/ic_book"
-        app:tint="@color/purple_500"
+        app:tint="@color/green_500"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -67,10 +67,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/purple_500"
+                app:boxStrokeColor="@color/green_500"
+                app:hintTextColor="@color/green_500"
                 app:startIconDrawable="@drawable/ic_email"
-                app:startIconTint="@color/purple_500">
+                app:startIconTint="@color/green_500">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextEmail"
@@ -86,10 +86,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Password"
-                app:boxStrokeColor="@color/purple_500"
-                app:hintTextColor="@color/purple_500"
+                app:boxStrokeColor="@color/green_500"
+                app:hintTextColor="@color/green_500"
                 app:startIconDrawable="@drawable/ic_lock"
-                app:startIconTint="@color/purple_500"
+                app:startIconTint="@color/green_500"
                 app:passwordToggleEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -117,7 +117,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Don't have an account? Register here"
-        android:textColor="@color/purple_500"
+        android:textColor="@color/green_500"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
