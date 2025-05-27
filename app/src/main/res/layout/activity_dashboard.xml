@@ -142,9 +142,10 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewDefinitions"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
+                        android:layout_height="wrap_content"
                         android:nestedScrollingEnabled="true"
-                        android:scrollbars="vertical" />
+                        android:scrollbars="vertical"
+                        android:minHeight="300dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -162,22 +163,6 @@
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
-            <TextView
-                android:id="@+id/textViewHistory"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Recent Searches"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:textColor="@color/green_500"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="12dp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewHistory"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

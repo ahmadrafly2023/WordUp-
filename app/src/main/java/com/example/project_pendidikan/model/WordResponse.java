@@ -17,6 +17,9 @@ public class WordResponse {
         @SerializedName("definitions")
         private List<Definition> definitions;
 
+        @SerializedName("synonyms")
+        private List<String> synonyms;
+
         public String getPartOfSpeech() {
             return partOfSpeech;
         }
@@ -24,14 +27,32 @@ public class WordResponse {
         public List<Definition> getDefinitions() {
             return definitions;
         }
+
+        public List<String> getSynonyms() {
+            return synonyms;
+        }
     }
 
     public static class Definition {
         @SerializedName("definition")
         private String definition;
 
+        @SerializedName("example")
+        private String example;
+
+        @SerializedName("synonyms")
+        private List<String> synonyms;
+
         public String getDefinition() {
             return definition;
+        }
+
+        public String getExample() {
+            return example;
+        }
+
+        public List<String> getSynonyms() {
+            return synonyms;
         }
     }
 

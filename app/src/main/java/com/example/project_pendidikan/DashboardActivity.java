@@ -344,14 +344,24 @@ public class DashboardActivity extends AppCompatActivity {
                 Definition definition = new Definition(
                     meaning.getPartOfSpeech(),
                     apiDef.getDefinition(),
-                    ""
+                    apiDef.getExample() != null ? apiDef.getExample() : ""
                 );
                 definitionAdapter.addDefinition(definition);
             }
-        }
 
-        // Clear synonyms as they're not provided by this API
-        chipGroupSynonyms.removeAllViews();
+            // Add synonyms for this meaning
+            if (meaning.getSynonyms() != null && !meaning.getSynonyms().isEmpty()) {
+                chipGroupSynonyms.removeAllViews();
+                for (String synonym : meaning.getSynonyms()) {
+                    Chip chip = new Chip(this);
+                    chip.setText(synonym);
+                    chip.setClickable(true);
+                    chip.setCheckable(false);
+                    chip.setOnClickListener(v -> searchWord(synonym));
+                    chipGroupSynonyms.addView(chip);
+                }
+            }
+        }
     }
 
     private boolean isNetworkAvailable() {
