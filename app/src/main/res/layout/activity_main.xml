@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
+    android:background="?attr/backgroundColor"
     android:padding="24dp"
     tools:context=".MainActivity">
 
@@ -15,7 +15,7 @@
         android:layout_height="120dp"
         android:layout_marginTop="48dp"
         android:src="@drawable/ic_book"
-        app:tint="@color/green_500"
+        app:tint="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Welcome Back!"
-        android:textColor="@color/black"
+        android:textColor="?android:attr/textColor"
         android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -40,7 +40,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Sign in to continue"
-        android:textColor="#666666"
+        android:textColor="?android:attr/textColorSecondary"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -53,6 +53,7 @@
         android:layout_marginTop="32dp"
         app:cardCornerRadius="16dp"
         app:cardElevation="8dp"
+        android:background="?attr/colorSurface"
         app:layout_constraintTop_toBottomOf="@id/subtitleLogin">
 
         <LinearLayout
@@ -67,16 +68,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
-                app:boxStrokeColor="@color/green_500"
-                app:hintTextColor="@color/green_500"
+                app:boxStrokeColor="?attr/colorPrimary"
+                app:hintTextColor="?attr/colorPrimary"
+                app:boxBackgroundColor="?attr/colorSurface"
                 app:startIconDrawable="@drawable/ic_email"
-                app:startIconTint="@color/green_500">
+                app:startIconTint="?attr/colorPrimary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress" />
+                    android:inputType="textEmailAddress"
+                    android:textColor="?android:attr/textColor" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -86,17 +89,20 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Password"
-                app:boxStrokeColor="@color/green_500"
-                app:hintTextColor="@color/green_500"
+                app:boxStrokeColor="?attr/colorPrimary"
+                app:hintTextColor="?attr/colorPrimary"
+                app:boxBackgroundColor="?attr/colorSurface"
                 app:startIconDrawable="@drawable/ic_lock"
-                app:startIconTint="@color/green_500"
-                app:passwordToggleEnabled="true">
+                app:startIconTint="?attr/colorPrimary"
+                app:passwordToggleEnabled="true"
+                app:endIconTint="?attr/colorPrimary">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/editTextPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword" />
+                    android:inputType="textPassword"
+                    android:textColor="?android:attr/textColor" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
@@ -106,6 +112,7 @@
                 android:layout_marginTop="24dp"
                 android:text="Sign In"
                 android:textSize="16sp"
+                android:backgroundTint="?attr/colorPrimary"
                 app:cornerRadius="8dp" />
 
         </LinearLayout>
@@ -117,7 +124,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Don't have an account? Register here"
-        android:textColor="@color/green_500"
+        android:textColor="?attr/colorPrimary"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -132,6 +139,8 @@
         android:text="View Registered Users"
         android:textSize="16sp"
         app:cornerRadius="8dp"
+        app:strokeColor="?attr/colorPrimary"
+        android:textColor="?attr/colorPrimary"
         app:layout_constraintTop_toBottomOf="@id/textViewRegister" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
