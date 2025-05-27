@@ -25,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseHelper databaseHelper;
     private static final String THEME_PREFS = "ThemePrefs";
     private static final String KEY_NIGHT_MODE = "night_mode";
+    private static final String PREF_NAME = "UserPref";
+    private static final String KEY_EMAIL = "email";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,8 +40,25 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        // Initialize DatabaseHelper first
         databaseHelper = new DatabaseHelper(this);
 
+        // Check if user is already logged in
+        SharedPreferences userPrefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        String savedEmail = userPrefs.getString(KEY_EMAIL, "");
+        if (!savedEmail.isEmpty() && databaseHelper.isEmailExists(savedEmail)) {
+            // User is already logged in, go to dashboard
+            String userName = databaseHelper.getUserName(savedEmail);
+            startDashboard(userName, savedEmail);
+            finish();
+            return;
+        }
+
+        // Initialize views only if not auto-logging in
+        initializeViews();
+    }
+
+    private void initializeViews() {
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
         buttonLogin = findViewById(R.id.buttonLogin);
@@ -92,16 +111,24 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (databaseHelper.checkUser(email, password)) {
-            // Get user name for the dashboard
+            // Save user email in SharedPreferences
+            SharedPreferences.Editor editor = getSharedPreferences(PREF_NAME, MODE_PRIVATE).edit();
+            editor.putString(KEY_EMAIL, email);
+            editor.apply();
+
+            // Get user name and start dashboard
             String userName = databaseHelper.getUserName(email);
-            
-            // Start dashboard activity
-            Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
-            intent.putExtra("USER_NAME", userName);
-            startActivity(intent);
-            finish(); // Close login activity
+            startDashboard(userName, email);
+            finish();
         } else {
             Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void startDashboard(String userName, String email) {
+        Intent intent = new Intent(MainActivity.this, DashboardActivity.class);
+        intent.putExtra("USER_NAME", userName);
+        intent.putExtra("USER_EMAIL", email);
+        startActivity(intent);
     }
 }

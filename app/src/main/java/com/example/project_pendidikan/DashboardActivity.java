@@ -98,9 +98,23 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
+        // Get user email from intent and save to SharedPreferences
+        String userEmail = getIntent().getStringExtra("USER_EMAIL");
+        if (userEmail != null && !userEmail.isEmpty()) {
+            SharedPreferences.Editor editor = getSharedPreferences("UserPref", MODE_PRIVATE).edit();
+            editor.putString("email", userEmail);
+            editor.apply();
+        }
+
         // Initialize views
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        
+        // Set title with user name if available
+        String userName = getIntent().getStringExtra("USER_NAME");
+        if (userName != null && !userName.isEmpty()) {
+            toolbar.setTitle("Welcome, " + userName);
+        }
 
         // Initialize UI components
         editTextSearch = findViewById(R.id.editTextSearch);
@@ -243,6 +257,11 @@ public class DashboardActivity extends AppCompatActivity {
             toggleTheme();
             return true;
         } else if (item.getItemId() == R.id.action_logout) {
+            // Clear user session
+            SharedPreferences.Editor editor = getSharedPreferences("UserPref", MODE_PRIVATE).edit();
+            editor.clear();
+            editor.apply();
+
             // Navigate back to MainActivity
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
