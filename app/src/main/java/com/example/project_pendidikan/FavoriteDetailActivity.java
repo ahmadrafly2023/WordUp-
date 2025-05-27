@@ -1,10 +1,14 @@
 package com.example.project_pendidikan;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -58,11 +62,15 @@ public class FavoriteDetailActivity extends AppCompatActivity {
                 chip.setClickable(true);
                 chip.setCheckable(false);
                 chip.setOnClickListener(v -> {
-                    Intent intent = new Intent(this, DashboardActivity.class);
-                    intent.putExtra("WORD_TO_SEARCH", synonym.trim());
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    finish();
+                    if (isNetworkAvailable()) {
+                        Intent intent = new Intent(this, DashboardActivity.class);
+                        intent.putExtra("WORD_TO_SEARCH", synonym.trim());
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "No internet connection available to search for new words", Toast.LENGTH_SHORT).show();
+                    }
                 });
                 chipGroupSynonyms.addView(chip);
             }
@@ -78,12 +86,28 @@ public class FavoriteDetailActivity extends AppCompatActivity {
 
         // Setup search button
         buttonSearch.setOnClickListener(v -> {
-            Intent intent = new Intent(this, DashboardActivity.class);
-            intent.putExtra("WORD_TO_SEARCH", word);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            startActivity(intent);
-            finish();
+            if (isNetworkAvailable()) {
+                Intent intent = new Intent(this, DashboardActivity.class);
+                intent.putExtra("WORD_TO_SEARCH", word);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(intent);
+                finish();
+            } else {
+                Toast.makeText(this, "No internet connection available to search for new words", Toast.LENGTH_SHORT).show();
+            }
         });
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (connectivityManager != null) {
+            NetworkCapabilities capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.getActiveNetwork());
+            return capabilities != null && (
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+        }
+        return false;
     }
 
     @Override

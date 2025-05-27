@@ -57,6 +57,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+import android.widget.LinearLayout;
+import androidx.core.content.ContextCompat;
+
 public class DashboardActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> favoritesLauncher;
 
@@ -288,8 +291,29 @@ public class DashboardActivity extends AppCompatActivity {
         currentWord = word.trim();
 
         if (!isNetworkAvailable()) {
-            showError("No internet connection");
+            showError("No internet connection. Please check your connection and try again.");
             btnRefresh.setVisibility(View.VISIBLE);
+            
+            // Show offline message in card
+            cardViewResult.setVisibility(View.VISIBLE);
+            textViewWord.setText(currentWord);
+            TextView offlineMessage = new TextView(this);
+            offlineMessage.setText("You are currently offline. Please check your internet connection and tap refresh to try again.");
+            offlineMessage.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
+            offlineMessage.setPadding(0, 16, 0, 16);
+            
+            LinearLayout contentLayout = cardViewResult.findViewById(R.id.content_layout);
+            if (contentLayout != null) {
+                // Remove any existing offline message first
+                for (int i = 0; i < contentLayout.getChildCount(); i++) {
+                    View child = contentLayout.getChildAt(i);
+                    if (child instanceof TextView && ((TextView) child).getText().toString().contains("offline")) {
+                        contentLayout.removeView(child);
+                        break;
+                    }
+                }
+                contentLayout.addView(offlineMessage, 0);
+            }
             return;
         }
 
@@ -310,6 +334,7 @@ public class DashboardActivity extends AppCompatActivity {
                         displayWordDetails(wordResponse);
                         cardViewResult.setVisibility(View.VISIBLE);
                         fabFavorite.show();
+                        btnRefresh.setVisibility(View.GONE);
                     } else {
                         showError("No definition found for: " + word);
                     }
@@ -379,14 +404,35 @@ public class DashboardActivity extends AppCompatActivity {
     private void showError(String message) {
         runOnUiThread(() -> {
             Toast.makeText(DashboardActivity.this, message, Toast.LENGTH_LONG).show();
-            cardViewResult.setVisibility(View.GONE);
-            fabFavorite.hide();
             
-            if (message.contains("internet") && currentWord != null && !currentWord.isEmpty()) {
+            if (message.contains("internet") || message.contains("Network error")) {
                 btnRefresh.setVisibility(View.VISIBLE);
+                // Show offline message in card
+                cardViewResult.setVisibility(View.VISIBLE);
+                textViewWord.setText(currentWord);
+                TextView offlineMessage = new TextView(this);
+                offlineMessage.setText("You are currently offline. Please check your internet connection and tap refresh to try again.");
+                offlineMessage.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
+                offlineMessage.setPadding(0, 16, 0, 16);
+                
+                LinearLayout contentLayout = cardViewResult.findViewById(R.id.content_layout);
+                if (contentLayout != null) {
+                    // Remove any existing offline message first
+                    for (int i = 0; i < contentLayout.getChildCount(); i++) {
+                        View child = contentLayout.getChildAt(i);
+                        if (child instanceof TextView && ((TextView) child).getText().toString().contains("offline")) {
+                            contentLayout.removeView(child);
+                            break;
+                        }
+                    }
+                    contentLayout.addView(offlineMessage, 0);
+                }
             } else {
+                cardViewResult.setVisibility(View.GONE);
                 btnRefresh.setVisibility(View.GONE);
             }
+            
+            fabFavorite.hide();
         });
     }
 

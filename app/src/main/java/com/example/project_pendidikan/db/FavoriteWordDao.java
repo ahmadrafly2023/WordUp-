@@ -21,6 +21,9 @@ public interface FavoriteWordDao {
     @Query("SELECT * FROM favorite_words ORDER BY timestamp DESC")
     LiveData<List<FavoriteWord>> getAllFavoriteWords();
 
+    @Query("SELECT * FROM favorite_words ORDER BY timestamp DESC")
+    List<FavoriteWord> getAllFavorites();
+
     @Query("SELECT * FROM favorite_words WHERE word LIKE :word LIMIT 1")
     FavoriteWord findByWord(String word);
 

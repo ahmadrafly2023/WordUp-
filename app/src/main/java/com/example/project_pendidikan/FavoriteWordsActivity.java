@@ -8,7 +8,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -60,9 +59,13 @@ public class FavoriteWordsActivity extends AppCompatActivity {
                 startActivity(intent);
             },
             // On delete click listener
-            word -> executorService.execute(() -> {
-                database.favoriteWordDao().delete(word);
-            })
+            word -> {
+                executorService.execute(() -> {
+                    database.favoriteWordDao().delete(word);
+                    // Reload data after deletion
+                    loadFavoriteWords();
+                });
+            }
         );
         recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewFavorites.setAdapter(adapter);
@@ -72,15 +75,18 @@ public class FavoriteWordsActivity extends AppCompatActivity {
     }
 
     private void loadFavoriteWords() {
-        database.favoriteWordDao().getAllFavoriteWords().observe(this, favoriteWords -> {
-            if (favoriteWords != null && !favoriteWords.isEmpty()) {
-                adapter.setFavoriteWords(favoriteWords);
-                textViewEmpty.setVisibility(View.GONE);
-                recyclerViewFavorites.setVisibility(View.VISIBLE);
-            } else {
-                textViewEmpty.setVisibility(View.VISIBLE);
-                recyclerViewFavorites.setVisibility(View.GONE);
-            }
+        executorService.execute(() -> {
+            List<FavoriteWord> favoriteWords = database.favoriteWordDao().getAllFavorites();
+            runOnUiThread(() -> {
+                if (favoriteWords.isEmpty()) {
+                    textViewEmpty.setVisibility(View.VISIBLE);
+                    recyclerViewFavorites.setVisibility(View.GONE);
+                } else {
+                    textViewEmpty.setVisibility(View.GONE);
+                    recyclerViewFavorites.setVisibility(View.VISIBLE);
+                    adapter.setFavoriteWords(favoriteWords);
+                }
+            });
         });
     }
 
@@ -96,6 +102,8 @@ public class FavoriteWordsActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        executorService.shutdown();
+        if (executorService != null) {
+            executorService.shutdown();
+        }
     }
 }
