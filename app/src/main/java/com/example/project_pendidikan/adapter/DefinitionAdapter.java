@@ -56,6 +56,20 @@ public class DefinitionAdapter extends RecyclerView.Adapter<DefinitionAdapter.De
         return definitions;
     }
 
+    public void clearDefinitions() {
+        if (definitions != null) {
+            definitions.clear();
+            notifyDataSetChanged();
+        }
+    }
+
+    public void addDefinition(Definition definition) {
+        if (definitions != null) {
+            definitions.add(definition);
+            notifyItemInserted(definitions.size() - 1);
+        }
+    }
+
     static class DefinitionViewHolder extends RecyclerView.ViewHolder {
         TextView textViewPartOfSpeech;
         TextView textViewDefinition;

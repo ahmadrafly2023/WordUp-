@@ -28,12 +28,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.project_pendidikan.adapter.DefinitionAdapter;
-import com.example.project_pendidikan.api.ApiClient;
-import com.example.project_pendidikan.api.DatamuseService;
+
+
+import com.example.project_pendidikan.api.DictionaryApiClient;
+import com.example.project_pendidikan.api.WordsApiService;
 import com.example.project_pendidikan.db.AppDatabase;
-import com.example.project_pendidikan.model.DatamuseWord;
+
 import com.example.project_pendidikan.model.Definition;
 import com.example.project_pendidikan.model.FavoriteWord;
+import com.example.project_pendidikan.model.WordResponse;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -60,11 +63,11 @@ public class DashboardActivity extends AppCompatActivity {
     private TextInputEditText editTextSearch;
     private CardView cardViewResult;
     private TextView textViewWord;
-    private TextView textViewPhonetic;
+
     private RecyclerView recyclerViewDefinitions;
     private ChipGroup chipGroupSynonyms;
     private DefinitionAdapter definitionAdapter;
-    private DatamuseService datamuseService;
+    private WordsApiService dictionaryService;
     private FloatingActionButton fabFavorite;
     private MaterialButton btnRefresh;
     private AppDatabase database;
@@ -89,7 +92,7 @@ public class DashboardActivity extends AppCompatActivity {
         editTextSearch = findViewById(R.id.editTextSearch);
         cardViewResult = findViewById(R.id.cardViewResult);
         textViewWord = findViewById(R.id.textViewWord);
-        textViewPhonetic = findViewById(R.id.textViewPhonetic);
+
         recyclerViewDefinitions = findViewById(R.id.recyclerViewDefinitions);
         chipGroupSynonyms = findViewById(R.id.chipGroupSynonyms);
         fabFavorite = findViewById(R.id.fabFavorite);
@@ -98,7 +101,12 @@ public class DashboardActivity extends AppCompatActivity {
         // Initialize database and services
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
-        datamuseService = ApiClient.getClient().create(DatamuseService.class);
+        dictionaryService = DictionaryApiClient.getClient().create(WordsApiService.class);
+
+        // Setup RecyclerView
+        recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(this));
+        definitionAdapter = new DefinitionAdapter(new ArrayList<>());
+        recyclerViewDefinitions.setAdapter(definitionAdapter);
 
         // Setup refresh button
         btnRefresh.setOnClickListener(v -> {
@@ -172,7 +180,7 @@ public class DashboardActivity extends AppCompatActivity {
         editTextSearch = findViewById(R.id.editTextSearch);
         cardViewResult = findViewById(R.id.cardViewResult);
         textViewWord = findViewById(R.id.textViewWord);
-        textViewPhonetic = findViewById(R.id.textViewPhonetic);
+
         chipGroupSynonyms = findViewById(R.id.chipGroupSynonyms);
         recyclerViewDefinitions = findViewById(R.id.recyclerViewDefinitions);
         fabFavorite = findViewById(R.id.fabFavorite);
@@ -248,8 +256,7 @@ public class DashboardActivity extends AppCompatActivity {
                     if (definitionAdapter != null && !definitionAdapter.getDefinitions().isEmpty()) {
                         definition = definitionAdapter.getDefinitions().get(0).getDefinition();
                     }
-                    String phonetic = textViewPhonetic.getVisibility() == View.VISIBLE ? 
-                            textViewPhonetic.getText().toString() : "";
+                    String phonetic = "";
                     
                     FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic);
                     database.favoriteWordDao().insert(newFavorite);
@@ -283,82 +290,59 @@ public class DashboardActivity extends AppCompatActivity {
         cardViewResult.setVisibility(View.GONE);
         fabFavorite.hide();
 
-        // Call API
-        Call<List<DatamuseWord>> call = datamuseService.getRelatedWords(word, "d");
-        call.enqueue(new Callback<List<DatamuseWord>>() {
+        // Call Dictionary API
+        Call<List<WordResponse>> dictionaryCall = dictionaryService.getWord(word.trim());
+        dictionaryCall.enqueue(new Callback<List<WordResponse>>() {
             @Override
-            public void onResponse(Call<List<DatamuseWord>> call, Response<List<DatamuseWord>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    displayWordDetails(word, response.body());
-                    getSynonyms(word);
+            public void onResponse(Call<List<WordResponse>> call, Response<List<WordResponse>> response) {
+                if (response.isSuccessful() && response.body() != null && !response.body().isEmpty()) {
+                    WordResponse wordResponse = response.body().get(0);
+                    if (wordResponse.isValid()) {
+                        displayWordDetails(wordResponse);
+                        cardViewResult.setVisibility(View.VISIBLE);
+                        fabFavorite.show();
+                    } else {
+                        showError("No definition found for: " + word);
+                    }
                 } else {
-                    showError("No definitions found");
+                    showError("No definition found for: " + word);
                 }
             }
 
             @Override
-            public void onFailure(Call<List<DatamuseWord>> call, Throwable t) {
-                showError("Error: " + t.getMessage());
+            public void onFailure(Call<List<WordResponse>> call, Throwable t) {
+                showError("Network error: " + t.getMessage());
+                btnRefresh.setVisibility(View.VISIBLE);
             }
         });
-
-        // Show loading state
-        cardViewResult.setVisibility(View.GONE);
-        fabFavorite.hide();
-
-        try {
-            // Search for word definitions with metadata
-            Call<List<DatamuseWord>> relatedCall = datamuseService.getRelatedWords(word.trim(), "d");
-            relatedCall.enqueue(new Callback<List<DatamuseWord>>() {
-                @Override
-                public void onResponse(Call<List<DatamuseWord>> call, Response<List<DatamuseWord>> response) {
-                    if (response != null && response.isSuccessful()) {
-                        List<DatamuseWord> words = response.body();
-                        if (words != null && !words.isEmpty()) {
-                            displayWordDetails(word.trim(), words);
-                            getSynonyms(word.trim());
-                            cardViewResult.setVisibility(View.VISIBLE);
-                        } else {
-                            showError("No definitions found for: " + word);
-                        }
-                    } else {
-                        showError("Error: " + (response != null ? response.message() : "Unknown error"));
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<List<DatamuseWord>> call, Throwable t) {
-                    showError("Network error: Please check your internet connection");
-                }
-            });
-        } catch (Exception e) {
-            showError("Error: " + e.getMessage());
-        }
     }
 
-    private void getSynonyms(String word) {
-        if (word == null || word.trim().isEmpty()) return;
-
-        try {
-            Call<List<DatamuseWord>> call = datamuseService.getSynonyms(word.trim(), "d");
-            call.enqueue(new Callback<List<DatamuseWord>>() {
-                @Override
-                public void onResponse(Call<List<DatamuseWord>> call, Response<List<DatamuseWord>> response) {
-                    if (response != null && response.isSuccessful() && response.body() != null) {
-                        displaySynonyms(response.body());
-                    } else {
-                        chipGroupSynonyms.removeAllViews();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<List<DatamuseWord>> call, Throwable t) {
-                    chipGroupSynonyms.removeAllViews();
-                }
-            });
-        } catch (Exception e) {
-            chipGroupSynonyms.removeAllViews();
+    private void displayWordDetails(WordResponse wordResponse) {
+        if (wordResponse == null) {
+            showError("No word details available");
+            return;
         }
+
+        currentWord = wordResponse.getWord();
+        textViewWord.setText(wordResponse.getWord());
+
+        // Clear previous definitions
+        definitionAdapter.clearDefinitions();
+
+        // Add all meanings and their definitions
+        for (WordResponse.Meaning meaning : wordResponse.getMeanings()) {
+            for (WordResponse.Definition apiDef : meaning.getDefinitions()) {
+                Definition definition = new Definition(
+                    meaning.getPartOfSpeech(),
+                    apiDef.getDefinition(),
+                    ""
+                );
+                definitionAdapter.addDefinition(definition);
+            }
+        }
+
+        // Clear synonyms as they're not provided by this API
+        chipGroupSynonyms.removeAllViews();
     }
 
     private boolean isNetworkAvailable() {
@@ -391,84 +375,5 @@ public class DashboardActivity extends AppCompatActivity {
         definitionAdapter.notifyItemChanged(position);
     }
 
-    private void displayWordDetails(String searchWord, List<DatamuseWord> words) {
-        try {
-            if (searchWord == null || words == null) {
-                showError("Invalid word data");
-                return;
-            }
 
-            cardViewResult.setVisibility(View.VISIBLE);
-            fabFavorite.show();
-            currentWord = searchWord;
-            
-            // Set word
-            textViewWord.setText(searchWord);
-            textViewPhonetic.setVisibility(View.GONE);
-
-            // Check if word is favorite
-            executorService.execute(() -> {
-                try {
-                    FavoriteWord favoriteWord = database.favoriteWordDao().findByWord(currentWord);
-                    runOnUiThread(() -> {
-                        fabFavorite.setImageResource(favoriteWord != null ? 
-                            android.R.drawable.btn_star_big_on : 
-                            android.R.drawable.btn_star_big_off);
-                    });
-                } catch (Exception e) {
-                    showError("Database error: " + e.getMessage());
-                }
-            });
-
-            // Set definitions
-            List<Definition> definitions = new ArrayList<>();
-            for (DatamuseWord word : words) {
-                if (word != null && word.getDefinitions() != null) {
-                    for (String def : word.getDefinitions()) {
-                        if (def != null) {
-                            try {
-                                // Parse definition string (format: "pos\tdef")
-                                String[] parts = def.split("\t");
-                                String partOfSpeech = parts.length >= 2 ? parts[0] : "";
-                                String definitionText = parts.length >= 2 ? parts[1] : def;
-                                Definition definition = new Definition(partOfSpeech, definitionText, "");
-                                definitions.add(definition);
-                            } catch (Exception e) {
-                                // Skip invalid definition
-                                continue;
-                            }
-                        }
-                    }
-                }
-            }
-            definitionAdapter.setDefinitions(definitions);
-        } catch (Exception e) {
-            showError("Error displaying word details: " + e.getMessage());
-        }
-    }
-
-    private void displaySynonyms(List<DatamuseWord> synonyms) {
-        if (synonyms == null) return;
-
-        runOnUiThread(() -> {
-            try {
-                chipGroupSynonyms.removeAllViews();
-                for (DatamuseWord synonym : synonyms) {
-                    if (synonym != null && synonym.getWord() != null) {
-                        Chip chip = new Chip(DashboardActivity.this);
-                        chip.setText(synonym.getWord());
-                        chip.setClickable(true);
-                        chip.setCheckable(false);
-                        chip.setOnClickListener(v -> {
-                            editTextSearch.setText(synonym.getWord());
-                            searchWord(synonym.getWord());
-                        });
-                        chipGroupSynonyms.addView(chip);
-                    }
-                }
-            } catch (Exception e) {
-                showError("Error displaying synonyms: " + e.getMessage());
-            }
-        });
-    }
 }

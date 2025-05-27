@@ -7,48 +7,31 @@ public class WordResponse {
     @SerializedName("word")
     private String word;
 
-    @SerializedName("pronunciation")
-    private Pronunciation pronunciation;
+    @SerializedName("meanings")
+    private List<Meaning> meanings;
 
-    @SerializedName("results")
-    private List<Result> results;
-
-    public static class Pronunciation {
-        @SerializedName("all")
-        private String all;
-
-        public String getAll() {
-            return all;
-        }
-    }
-
-    public static class Result {
-        @SerializedName("definition")
-        private String definition;
-
+    public static class Meaning {
         @SerializedName("partOfSpeech")
         private String partOfSpeech;
 
-        @SerializedName("synonyms")
-        private List<String> synonyms;
-
-        @SerializedName("examples")
-        private List<String> examples;
-
-        public String getDefinition() {
-            return definition;
-        }
+        @SerializedName("definitions")
+        private List<Definition> definitions;
 
         public String getPartOfSpeech() {
             return partOfSpeech;
         }
 
-        public List<String> getSynonyms() {
-            return synonyms;
+        public List<Definition> getDefinitions() {
+            return definitions;
         }
+    }
 
-        public List<String> getExamples() {
-            return examples;
+    public static class Definition {
+        @SerializedName("definition")
+        private String definition;
+
+        public String getDefinition() {
+            return definition;
         }
     }
 
@@ -56,11 +39,11 @@ public class WordResponse {
         return word;
     }
 
-    public Pronunciation getPronunciation() {
-        return pronunciation;
+    public List<Meaning> getMeanings() {
+        return meanings;
     }
 
-    public List<Result> getResults() {
-        return results;
+    public boolean isValid() {
+        return word != null && meanings != null && !meanings.isEmpty();
     }
 }
