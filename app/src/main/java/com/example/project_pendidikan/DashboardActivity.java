@@ -257,7 +257,17 @@ public class DashboardActivity extends AppCompatActivity {
                     }
                     String phonetic = "";
                     
-                    FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic);
+                    // Get synonyms
+                    StringBuilder synonymsBuilder = new StringBuilder();
+                    int chipCount = chipGroupSynonyms.getChildCount();
+                    for (int i = 0; i < chipCount; i++) {
+                        Chip chip = (Chip) chipGroupSynonyms.getChildAt(i);
+                        if (i > 0) synonymsBuilder.append(",");
+                        synonymsBuilder.append(chip.getText().toString());
+                    }
+                    String synonyms = synonymsBuilder.toString();
+                    
+                    FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic, synonyms);
                     database.favoriteWordDao().insert(newFavorite);
                     runOnUiThread(() -> {
                         fabFavorite.setImageResource(android.R.drawable.btn_star_big_on);

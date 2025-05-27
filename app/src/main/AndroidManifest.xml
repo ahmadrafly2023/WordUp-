@@ -38,6 +38,10 @@
         <activity
             android:name=".ProfileActivity"
             android:exported="false" />
+        <activity
+            android:name=".FavoriteDetailActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Project_pendidikan" />
     </application>
 
 </manifest>

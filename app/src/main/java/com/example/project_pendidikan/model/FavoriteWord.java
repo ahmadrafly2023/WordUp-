@@ -2,6 +2,7 @@ package com.example.project_pendidikan.model;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
+import androidx.room.Ignore;
 
 @Entity(tableName = "favorite_words")
 public class FavoriteWord {
@@ -10,12 +11,23 @@ public class FavoriteWord {
     private String word;
     private String definition;
     private String phonetic;
+    private String synonyms;
     private long timestamp;
 
+    @Ignore
     public FavoriteWord(String word, String definition, String phonetic) {
         this.word = word;
         this.definition = definition;
         this.phonetic = phonetic;
+        this.synonyms = "";
+        this.timestamp = System.currentTimeMillis();
+    }
+
+    public FavoriteWord(String word, String definition, String phonetic, String synonyms) {
+        this.word = word;
+        this.definition = definition;
+        this.phonetic = phonetic;
+        this.synonyms = synonyms != null ? synonyms : "";
         this.timestamp = System.currentTimeMillis();
     }
 
@@ -49,6 +61,14 @@ public class FavoriteWord {
 
     public void setPhonetic(String phonetic) {
         this.phonetic = phonetic;
+    }
+
+    public String getSynonyms() {
+        return synonyms != null ? synonyms : "";
+    }
+
+    public void setSynonyms(String synonyms) {
+        this.synonyms = synonyms != null ? synonyms : "";
     }
 
     public long getTimestamp() {

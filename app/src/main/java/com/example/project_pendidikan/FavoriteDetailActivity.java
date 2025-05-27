@@ -1,0 +1,97 @@
+package com.example.project_pendidikan;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+
+public class FavoriteDetailActivity extends AppCompatActivity {
+    public static final String EXTRA_WORD = "extra_word";
+    public static final String EXTRA_DEFINITION = "extra_definition";
+    public static final String EXTRA_PHONETIC = "extra_phonetic";
+    public static final String EXTRA_SYNONYMS = "extra_synonyms";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_favorite_detail);
+
+        // Setup toolbar
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Get views
+        TextView textViewWord = findViewById(R.id.textViewWord);
+        TextView textViewPhonetic = findViewById(R.id.textViewPhonetic);
+        TextView textViewDefinition = findViewById(R.id.textViewDefinition);
+        ChipGroup chipGroupSynonyms = findViewById(R.id.chipGroupSynonyms);
+        TextView labelSynonyms = findViewById(R.id.labelSynonyms);
+        MaterialButton buttonSearch = findViewById(R.id.buttonSearch);
+
+        // Get extras from intent
+        String word = getIntent().getStringExtra(EXTRA_WORD);
+        String definition = getIntent().getStringExtra(EXTRA_DEFINITION);
+        String phonetic = getIntent().getStringExtra(EXTRA_PHONETIC);
+        String synonyms = getIntent().getStringExtra(EXTRA_SYNONYMS);
+
+        // Set data to views
+        textViewWord.setText(word);
+        textViewPhonetic.setText(phonetic);
+        textViewDefinition.setText(definition);
+
+        // Handle synonyms
+        if (synonyms != null && !synonyms.isEmpty()) {
+            String[] synonymArray = synonyms.split(",");
+            for (String synonym : synonymArray) {
+                Chip chip = new Chip(this);
+                chip.setText(synonym.trim());
+                chip.setClickable(true);
+                chip.setCheckable(false);
+                chip.setOnClickListener(v -> {
+                    Intent intent = new Intent(this, DashboardActivity.class);
+                    intent.putExtra("WORD_TO_SEARCH", synonym.trim());
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(intent);
+                    finish();
+                });
+                chipGroupSynonyms.addView(chip);
+            }
+            labelSynonyms.setVisibility(View.VISIBLE);
+            chipGroupSynonyms.setVisibility(View.VISIBLE);
+        } else {
+            labelSynonyms.setVisibility(View.GONE);
+            chipGroupSynonyms.setVisibility(View.GONE);
+        }
+
+        // Set toolbar title to the word
+        getSupportActionBar().setTitle(word);
+
+        // Setup search button
+        buttonSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(this, DashboardActivity.class);
+            intent.putExtra("WORD_TO_SEARCH", word);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            getOnBackPressedDispatcher().onBackPressed();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+} 

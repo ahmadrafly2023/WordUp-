@@ -52,10 +52,12 @@ public class FavoriteWordsActivity extends AppCompatActivity {
         adapter = new FavoriteWordAdapter(
             // On item click listener
             word -> {
-                Intent intent = new Intent();
-                intent.putExtra("WORD_TO_SEARCH", word.getWord());
-                setResult(RESULT_OK, intent);
-                finish();
+                Intent intent = new Intent(this, FavoriteDetailActivity.class);
+                intent.putExtra(FavoriteDetailActivity.EXTRA_WORD, word.getWord());
+                intent.putExtra(FavoriteDetailActivity.EXTRA_DEFINITION, word.getDefinition());
+                intent.putExtra(FavoriteDetailActivity.EXTRA_PHONETIC, word.getPhonetic());
+                intent.putExtra(FavoriteDetailActivity.EXTRA_SYNONYMS, word.getSynonyms());
+                startActivity(intent);
             },
             // On delete click listener
             word -> executorService.execute(() -> {

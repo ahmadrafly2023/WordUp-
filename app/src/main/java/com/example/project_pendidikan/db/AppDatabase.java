@@ -5,10 +5,12 @@ import android.content.Context;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.project_pendidikan.model.FavoriteWord;
 
-@Database(entities = {FavoriteWord.class}, version = 1)
+@Database(entities = {FavoriteWord.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
     
@@ -20,7 +22,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     context.getApplicationContext(),
                     AppDatabase.class,
                     "vocabulary_db")
-                    .fallbackToDestructiveMigration()
+                    .addMigrations(new Migration_1_2())
                     .build();
         }
         return instance;
