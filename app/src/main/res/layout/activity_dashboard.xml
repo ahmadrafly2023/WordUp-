@@ -8,7 +8,7 @@
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:background="?attr/colorSurface"
         app:elevation="0dp"
         app:layout_constraintTop_toTopOf="parent">
 
@@ -16,9 +16,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/white"
+            android:background="?attr/colorSurface"
             app:menu="@menu/top_app_bar"
-            app:titleTextColor="@color/green_500"
+            app:titleTextColor="?attr/colorPrimary"
             app:title="project_pendidikan" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -50,26 +50,23 @@
 
                     <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/searchInputLayout"
+                        style="@style/Widget.App.TextInputLayout"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
                         android:hint="Search word"
                         app:startIconDrawable="@android:drawable/ic_menu_search"
-                        app:startIconTint="@color/green_500"
-                        app:boxStrokeColor="@color/green_500"
-                        app:hintTextColor="@color/green_500"
-                        app:boxBackgroundColor="#F5F5F5"
-                        app:boxCornerRadiusTopStart="12dp"
-                        app:boxCornerRadiusTopEnd="12dp"
-                        app:boxCornerRadiusBottomStart="12dp"
-                        app:boxCornerRadiusBottomEnd="12dp"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                        app:startIconTint="?attr/colorControlNormal">
 
                         <com.google.android.material.textfield.TextInputEditText
                             android:id="@+id/editTextSearch"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:imeOptions="actionSearch"
                             android:inputType="text"
-                            android:imeOptions="actionSearch" />
+                            android:maxLines="1" />
+
                     </com.google.android.material.textfield.TextInputLayout>
 
                 </LinearLayout>

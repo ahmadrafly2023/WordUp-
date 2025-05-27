@@ -2,8 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_toggle_theme"
+        android:icon="@drawable/ic_theme_mode"
+        android:title="Toggle Theme"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_logout"
         android:title="Logout"
         android:icon="@android:drawable/ic_lock_power_off"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
 </menu>

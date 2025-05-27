@@ -13,6 +13,8 @@ import androidx.activity.EdgeToEdge;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.appcompat.app.AppCompatDelegate;
+import android.content.SharedPreferences;
 
 import com.example.project_pendidikan.db.DatabaseHelper;
 
@@ -21,9 +23,17 @@ public class MainActivity extends AppCompatActivity {
     private Button buttonLogin;
     private TextView textViewRegister;
     private DatabaseHelper databaseHelper;
+    private static final String THEME_PREFS = "ThemePrefs";
+    private static final String KEY_NIGHT_MODE = "night_mode";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply theme before super.onCreate
+        SharedPreferences themePreferences = getSharedPreferences(THEME_PREFS, MODE_PRIVATE);
+        boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
+        AppCompatDelegate.setDefaultNightMode(isNightMode ? 
+            AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+            
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);

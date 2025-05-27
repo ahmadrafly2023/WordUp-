@@ -19,6 +19,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.cardview.widget.CardView;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -59,9 +60,13 @@ import retrofit2.Response;
 
 import android.widget.LinearLayout;
 import androidx.core.content.ContextCompat;
+import android.content.SharedPreferences;
 
 public class DashboardActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> favoritesLauncher;
+    private SharedPreferences themePreferences;
+    private static final String THEME_PREFS = "ThemePrefs";
+    private static final String KEY_NIGHT_MODE = "night_mode";
 
     private TextInputEditText editTextSearch;
     private CardView cardViewResult;
@@ -84,6 +89,12 @@ public class DashboardActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply theme before super.onCreate
+        themePreferences = getSharedPreferences(THEME_PREFS, MODE_PRIVATE);
+        boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
+        AppCompatDelegate.setDefaultNightMode(isNightMode ? 
+            AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+            
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
@@ -221,12 +232,17 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.top_app_bar, menu);
+        // Update theme icon based on current mode
+        updateThemeIcon(menu.findItem(R.id.action_toggle_theme));
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_logout) {
+        if (item.getItemId() == R.id.action_toggle_theme) {
+            toggleTheme();
+            return true;
+        } else if (item.getItemId() == R.id.action_logout) {
             // Navigate back to MainActivity
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -235,6 +251,26 @@ public class DashboardActivity extends AppCompatActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void toggleTheme() {
+        boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
+        themePreferences.edit().putBoolean(KEY_NIGHT_MODE, !isNightMode).apply();
+        
+        // Apply the new theme
+        AppCompatDelegate.setDefaultNightMode(!isNightMode ? 
+            AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        
+        // Recreate the activity for the theme to take effect
+        recreate();
+    }
+
+    private void updateThemeIcon(MenuItem item) {
+        if (item != null && item.getItemId() == R.id.action_toggle_theme) {
+            boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
+            item.setIcon(isNightMode ? 
+                R.drawable.ic_theme_mode : R.drawable.ic_theme_mode);
+        }
     }
 
     private void toggleFavorite() {
