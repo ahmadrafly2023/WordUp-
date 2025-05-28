@@ -13,12 +13,11 @@
         android:layout_width="120dp"
         android:layout_height="120dp"
         android:layout_marginTop="48dp"
-        android:src="@drawable/ic_book"
-        app:tint="?attr/colorPrimary"
+        android:src="@drawable/logo_app"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:contentDescription="Book Icon" />
+        android:contentDescription="App Logo" />
 
     <TextView
         android:id="@+id/titleRegister"
