@@ -61,6 +61,9 @@ import retrofit2.Response;
 import android.widget.LinearLayout;
 import androidx.core.content.ContextCompat;
 import android.content.SharedPreferences;
+import android.text.Editable;
+import android.text.TextWatcher;
+import com.google.android.material.textfield.TextInputLayout;
 
 public class DashboardActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> favoritesLauncher;
@@ -160,6 +163,29 @@ public class DashboardActivity extends AppCompatActivity {
                 return true;
             }
             return false;
+        });
+        
+        // Setup clear text functionality
+        TextInputLayout searchInputLayout = findViewById(R.id.searchInputLayout);
+        searchInputLayout.setEndIconOnClickListener(v -> {
+            // The clear button already clears the text, but we need to hide results
+            resetSearchResults();
+        });
+        
+        // Add text watcher to detect when text is cleared
+        editTextSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() == 0) {
+                    resetSearchResults();
+                }
+            }
         });
 
         // Setup favorite button
@@ -494,6 +520,27 @@ public class DashboardActivity extends AppCompatActivity {
     private void updateFavoriteUI(int position, boolean isFavorite) {
         definitionAdapter.notifyItemChanged(position);
     }
-
+    
+    /**
+     * Resets the search results when the search field is cleared
+     */
+    private void resetSearchResults() {
+        // Hide the results card
+        cardViewResult.setVisibility(View.GONE);
+        
+        // Hide the favorite button
+        fabFavorite.hide();
+        
+        // Reset current word
+        currentWord = null;
+        
+        // Clear definitions
+        if (definitionAdapter != null) {
+            definitionAdapter.clearDefinitions();
+        }
+        
+        // Hide refresh button
+        btnRefresh.setVisibility(View.GONE);
+    }
 
 }
