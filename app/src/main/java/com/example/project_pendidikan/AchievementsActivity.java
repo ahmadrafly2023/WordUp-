@@ -7,6 +7,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.project_pendidikan.model.UserProgress;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -98,19 +99,19 @@ public class AchievementsActivity extends AppCompatActivity {
         // Achievement 1: Complete first quiz
         if (userProgress.getQuizzesTaken() > 0) {
             imageAchievement1.setImageResource(android.R.drawable.checkbox_on_background);
-            imageAchievement1.setColorFilter(getResources().getColor(android.R.color.holo_green_dark));
+            imageAchievement1.setColorFilter(ContextCompat.getColor(this, android.R.color.holo_green_dark));
         }
         
         // Achievement 2: Get 10 correct answers in a row
         if (userProgress.getCurrentStreak() >= 10) {
             imageAchievement2.setImageResource(android.R.drawable.checkbox_on_background);
-            imageAchievement2.setColorFilter(getResources().getColor(android.R.color.holo_green_dark));
+            imageAchievement2.setColorFilter(ContextCompat.getColor(this, android.R.color.holo_green_dark));
         }
         
         // Achievement 3: Reach Level 5
         if (userProgress.getLevel() >= 5) {
             imageAchievement3.setImageResource(android.R.drawable.checkbox_on_background);
-            imageAchievement3.setColorFilter(getResources().getColor(android.R.color.holo_green_dark));
+            imageAchievement3.setColorFilter(ContextCompat.getColor(this, android.R.color.holo_green_dark));
         }
     }
 }

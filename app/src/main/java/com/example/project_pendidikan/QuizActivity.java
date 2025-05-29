@@ -1,14 +1,27 @@
 package com.example.project_pendidikan;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -47,6 +60,18 @@ public class QuizActivity extends AppCompatActivity {
     private MaterialCardView cardFeedback;
     private TextView textViewFeedback;
     private MaterialButton buttonNext;
+    private ImageView imageEmotionFeedback;
+    
+    // Popup feedback
+    private AlertDialog feedbackDialog;
+    private View dialogView;
+    private ImageView imageFeedbackIcon;
+    private TextView textFeedbackMessage;
+    
+    // Popup quiz completed
+    private AlertDialog quizCompletedDialog;
+    private View quizCompletedView;
+    private TextView textFinalScore;
     
     private List<QuizQuestion> quizQuestions = new ArrayList<>();
     private int currentQuestionIndex = 0;
@@ -64,7 +89,16 @@ public class QuizActivity extends AppCompatActivity {
         // Initialize toolbar
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> finish());
+        // Disable navigation click to prevent auto-finish
+        toolbar.setNavigationOnClickListener(v -> {
+            // Tampilkan dialog konfirmasi jika ingin keluar dari quiz
+            new AlertDialog.Builder(this)
+                .setTitle("Keluar dari Quiz?")
+                .setMessage("Apakah kamu yakin ingin keluar? Progres quiz tidak akan disimpan.")
+                .setPositiveButton("Ya", (dialog, which) -> finish())
+                .setNegativeButton("Tidak", null)
+                .show();
+        });
         
         // Initialize views
         textViewQuestionNumber = findViewById(R.id.textViewQuestionNumber);
@@ -91,12 +125,22 @@ public class QuizActivity extends AppCompatActivity {
         cardFeedback = findViewById(R.id.cardFeedback);
         textViewFeedback = findViewById(R.id.textViewFeedback);
         buttonNext = findViewById(R.id.buttonNext);
+        imageEmotionFeedback = findViewById(R.id.imageEmotionFeedback);
         
         // Load user progress
         loadUserProgress();
         
         // Initialize dictionary service
         dictionaryService = DictionaryApiClient.getClient().create(WordsApiService.class);
+        
+        // Initialize popup feedback
+        initPopupFeedback();
+        
+        // Initialize popup quiz completed
+        initQuizCompletedPopup();
+        
+        // Load user progress
+        loadUserProgress();
         
         // Set up quiz words (common English words for the quiz)
         setupQuizWords();
@@ -325,13 +369,13 @@ public class QuizActivity extends AppCompatActivity {
     private void selectOption(int index) {
         // Reset all options first
         for (int i = 0; i < optionCards.length; i++) {
-            optionCards[i].setCardBackgroundColor(getResources().getColor(android.R.color.transparent));
+            optionCards[i].setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
             optionImages[i].setImageResource(android.R.drawable.radiobutton_off_background);
         }
         
         // Highlight the selected option
         selectedOptionIndex = index;
-        optionCards[index].setCardBackgroundColor(getResources().getColor(android.R.color.holo_blue_light, null));
+        optionCards[index].setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
         optionImages[index].setImageResource(android.R.drawable.radiobutton_on_background);
     }
     
@@ -358,7 +402,7 @@ public class QuizActivity extends AppCompatActivity {
             // Reset UI state
             selectedOptionIndex = -1;
             for (int i = 0; i < optionCards.length; i++) {
-                optionCards[i].setCardBackgroundColor(getResources().getColor(android.R.color.transparent));
+                optionCards[i].setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
                 optionImages[i].setImageResource(android.R.drawable.radiobutton_off_background);
             }
             buttonSubmit.setEnabled(true);
@@ -366,6 +410,90 @@ public class QuizActivity extends AppCompatActivity {
         } else {
             // Quiz completed
             finishQuiz();
+        }
+    }
+    
+    /**
+     * Initialize popup feedback
+     */
+    private void initPopupFeedback() {
+        // Buat builder untuk dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        
+        // Inflate layout untuk dialog
+        LayoutInflater inflater = LayoutInflater.from(this);
+        dialogView = inflater.inflate(R.layout.popup_feedback, null);
+        
+        // Initialize dialog components
+        imageFeedbackIcon = dialogView.findViewById(R.id.imageFeedbackIcon);
+        textFeedbackMessage = dialogView.findViewById(R.id.textFeedbackMessage);
+        
+        // Initialize next button
+        MaterialButton buttonNextPopup = dialogView.findViewById(R.id.buttonNextPopup);
+        buttonNextPopup.setOnClickListener(v -> {
+            // Dismiss dialog dan show next question
+            if (feedbackDialog != null && feedbackDialog.isShowing()) {
+                feedbackDialog.dismiss();
+            }
+            showNextQuestion();
+        });
+        
+        // Set view ke dialog builder
+        builder.setView(dialogView);
+        
+        // Buat dialog
+        feedbackDialog = builder.create();
+        
+        // Atur agar dialog tidak bisa dibatalkan dengan tombol back
+        feedbackDialog.setCancelable(false);
+        
+        // Atur tampilan dialog agar transparan
+        if (feedbackDialog.getWindow() != null) {
+            feedbackDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+    
+    /**
+     * Show popup feedback
+     */
+    private void showPopupFeedback(boolean isCorrect) {
+        // Set icon and message based on answer
+        if (isCorrect) {
+            imageFeedbackIcon.setImageResource(R.drawable.ic_thumbs_up);
+            textFeedbackMessage.setText("Benar! Bagus sekali.");
+            textFeedbackMessage.setTextColor(ContextCompat.getColor(this, R.color.green_500));
+            dialogView.findViewById(R.id.popupFeedback).setBackgroundTintList(
+                    ContextCompat.getColorStateList(this, R.color.green_200));
+            dialogView.findViewById(R.id.buttonNextPopup).setBackgroundTintList(
+                    ContextCompat.getColorStateList(this, R.color.green_500));
+        } else {
+            // Gunakan ikon X berwarna putih yang lebih terlihat pada latar belakang merah
+            imageFeedbackIcon.setImageResource(R.drawable.ic_wrong);
+            textFeedbackMessage.setText("Salah. Jawaban yang benar adalah: " + 
+                    quizQuestions.get(currentQuestionIndex).getCorrectDefinition());
+            textFeedbackMessage.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+            // Gunakan warna merah yang lebih terang untuk latar belakang
+            dialogView.findViewById(R.id.popupFeedback).setBackgroundTintList(
+                    ContextCompat.getColorStateList(this, R.color.red_700));
+            // Gunakan warna merah gelap untuk tombol
+            dialogView.findViewById(R.id.buttonNextPopup).setBackgroundTintList(
+                    ContextCompat.getColorStateList(this, R.color.red_900));
+            
+            // Pastikan tidak ada background pada ikon
+            imageFeedbackIcon.setBackground(null);
+        }
+        
+        // Tampilkan dialog
+        feedbackDialog.show();
+        
+        // Atur ukuran dialog
+        Window window = feedbackDialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+            layoutParams.copyFrom(window.getAttributes());
+            layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(layoutParams);
         }
     }
     
@@ -386,23 +514,34 @@ public class QuizActivity extends AppCompatActivity {
             score++;
             textViewScore.setText(String.valueOf(score));
             textViewFeedback.setText("Benar! Bagus sekali.");
-            textViewFeedback.setTextColor(getResources().getColor(android.R.color.holo_green_dark));
+            textViewFeedback.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
+            imageEmotionFeedback.setImageResource(R.drawable.ic_emotion_happy);
+            
+            // Tampilkan popup dengan animasi
+            cardFeedback.setCardBackgroundColor(ContextCompat.getColor(this, R.color.green_200));
             
             // Update user progress
             userProgress.incrementCorrectAnswers();
         } else {
             textViewFeedback.setText("Salah. Jawaban yang benar adalah: " + currentQuestion.getCorrectDefinition());
-            textViewFeedback.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+            textViewFeedback.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
+            imageEmotionFeedback.setImageResource(R.drawable.ic_emotion_sad);
+            
+            // Tampilkan popup dengan animasi
+            cardFeedback.setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
             
             // Reset streak on wrong answer
             userProgress.resetStreak();
         }
         
+        // Show popup feedback in center of screen
+        showPopupFeedback(isCorrect);
+        
         // Save progress
         saveUserProgress();
         
-        // Show feedback
-        cardFeedback.setVisibility(View.VISIBLE);
+        // Hide bottom feedback card - kita hanya menggunakan popup
+        cardFeedback.setVisibility(View.GONE);
         buttonSubmit.setEnabled(false);
         
         // Disable option cards
@@ -426,15 +565,85 @@ public class QuizActivity extends AppCompatActivity {
         }
     }
     
+    /**
+     * Initialize popup for quiz completion
+     */
+    private void initQuizCompletedPopup() {
+        // Buat builder untuk dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        
+        // Inflate layout untuk dialog
+        LayoutInflater inflater = LayoutInflater.from(this);
+        quizCompletedView = inflater.inflate(R.layout.popup_quiz_completed, null);
+        
+        // Initialize dialog components
+        textFinalScore = quizCompletedView.findViewById(R.id.textFinalScore);
+        
+        // Initialize view achievements button
+        MaterialButton buttonViewAchievements = quizCompletedView.findViewById(R.id.buttonViewAchievements);
+        buttonViewAchievements.setOnClickListener(v -> {
+            // Dismiss dialog dan buka halaman achievements
+            if (quizCompletedDialog != null && quizCompletedDialog.isShowing()) {
+                quizCompletedDialog.dismiss();
+            }
+            
+            // Buka halaman achievements
+            Intent intent = new Intent(QuizActivity.this, AchievementsActivity.class);
+            startActivity(intent);
+            
+            // Tutup activity quiz
+            finish();
+        });
+        
+        // Set view ke dialog builder
+        builder.setView(quizCompletedView);
+        
+        // Buat dialog
+        quizCompletedDialog = builder.create();
+        
+        // Atur agar dialog tidak bisa dibatalkan dengan tombol back
+        quizCompletedDialog.setCancelable(false);
+        
+        // Atur tampilan dialog agar transparan
+        if (quizCompletedDialog.getWindow() != null) {
+            quizCompletedDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+    }
+    
+    /**
+     * Tampilkan popup quiz completed
+     */
+    private void showQuizCompletedPopup() {
+        // Set final score
+        textFinalScore.setText("Skor akhir: " + score + "/" + QUIZ_SIZE);
+        
+        // Tampilkan dialog
+        quizCompletedDialog.show();
+        
+        // Atur ukuran dialog
+        Window window = quizCompletedDialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+            layoutParams.copyFrom(window.getAttributes());
+            layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(layoutParams);
+        }
+    }
+    
     private void finishQuiz() {
         // Update user progress
         userProgress.incrementQuizzesTaken();
         saveUserProgress();
         
-        // Show completion message
-        Toast.makeText(this, "Quiz completed! Your score: " + score + "/" + QUIZ_SIZE, Toast.LENGTH_LONG).show();
+        // Tambahkan log untuk debugging
+        Log.d("QuizActivity", "Quiz selesai, menampilkan popup completed");
         
-        // Return to dashboard
-        finish();
+        // Tampilkan popup quiz completed dengan delay kecil untuk memastikan UI thread siap
+        new Handler(Looper.getMainLooper()).post(() -> {
+            showQuizCompletedPopup();
+        });
+        
+        // PENTING: JANGAN panggil finish() di sini, biarkan user menekan tombol di popup
     }
 }

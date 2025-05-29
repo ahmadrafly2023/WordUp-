@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/popupQuizCompleted"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    android:visibility="visible">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp"
+        android:background="@color/green_200">
+
+        <ImageView
+            android:id="@+id/imageCompletedIcon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_trophy"
+            android:padding="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Quiz mu berhasil kamu kerjakan!"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/green_900"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/textFinalScore"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            android:text="Skor akhir: 8/10"
+            android:textSize="18sp"
+            android:textColor="@color/green_700"
+            android:gravity="center" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonViewAchievements"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="LIHAT SKOR"
+            android:textSize="16sp"
+            android:backgroundTint="@color/green_500"
+            app:cornerRadius="8dp" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

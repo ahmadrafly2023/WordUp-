@@ -10,7 +10,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.project_pendidikan.model.FavoriteWord;
 
-@Database(entities = {FavoriteWord.class}, version = 2)
+@Database(entities = {FavoriteWord.class}, version = 3)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase instance;
     
@@ -22,7 +22,7 @@ public abstract class AppDatabase extends RoomDatabase {
                     context.getApplicationContext(),
                     AppDatabase.class,
                     "vocabulary_db")
-                    .addMigrations(new Migration_1_2())
+                    .addMigrations(new Migration_1_2(), new Migration_2_3())
                     .build();
         }
         return instance;

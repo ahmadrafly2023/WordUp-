@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "71d7d9c86b922df8e74a74a989c4a1fe",
+    "identityHash": "08cffc249b2d3d5618125128d7a90296",
     "entities": [
       {
         "tableName": "favorite_words",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `word` TEXT, `definition` TEXT, `phonetic` TEXT, `synonyms` TEXT, `timestamp` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `word` TEXT, `definition` TEXT, `phonetic` TEXT, `synonyms` TEXT, `timestamp` INTEGER NOT NULL, `userEmail` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,38 +43,12 @@
             "columnName": "timestamp",
             "affinity": "INTEGER",
             "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": true,
-          "columnNames": [
-            "id"
-          ]
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
-        "tableName": "recent_searches",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `word` TEXT, `timestamp` INTEGER NOT NULL)",
-        "fields": [
-          {
-            "fieldPath": "id",
-            "columnName": "id",
-            "affinity": "INTEGER",
-            "notNull": true
           },
           {
-            "fieldPath": "word",
-            "columnName": "word",
+            "fieldPath": "userEmail",
+            "columnName": "userEmail",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "timestamp",
-            "columnName": "timestamp",
-            "affinity": "INTEGER",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -90,7 +64,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '71d7d9c86b922df8e74a74a989c4a1fe')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '08cffc249b2d3d5618125128d7a90296')"
     ]
   }
 }

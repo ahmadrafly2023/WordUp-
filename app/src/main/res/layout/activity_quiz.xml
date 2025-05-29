@@ -289,6 +289,7 @@
                 android:layout_height="wrap_content"
                 android:text="Submit Answer"
                 android:layout_marginTop="16dp"
+                android:backgroundTint="@color/green_500"
                 app:cornerRadius="8dp" />
 
             <!-- Feedback Card (Initially Hidden) -->
@@ -307,11 +308,19 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <ImageView
+                        android:id="@+id/imageEmotionFeedback"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="8dp"
+                        android:src="@drawable/ic_emotion_happy" />
+
                     <TextView
                         android:id="@+id/textViewFeedback"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Correct! Well done."
+                        android:text="Benar! Bagus sekali."
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:gravity="center" />

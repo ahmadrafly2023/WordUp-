@@ -26,6 +26,7 @@ public class FavoriteWordsActivity extends AppCompatActivity {
     private FavoriteWordAdapter adapter;
     private AppDatabase database;
     private ExecutorService executorService;
+    private String userEmail; // Email pengguna yang sedang login
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,9 @@ public class FavoriteWordsActivity extends AppCompatActivity {
         // Initialize database
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
+        
+        // Dapatkan email pengguna yang sedang login
+        userEmail = getSharedPreferences("UserPref", MODE_PRIVATE).getString("email", "");
 
         // Setup RecyclerView
         adapter = new FavoriteWordAdapter(
@@ -76,7 +80,8 @@ public class FavoriteWordsActivity extends AppCompatActivity {
 
     private void loadFavoriteWords() {
         executorService.execute(() -> {
-            List<FavoriteWord> favoriteWords = database.favoriteWordDao().getAllFavorites();
+            // Gunakan query yang memfilter berdasarkan userEmail
+            List<FavoriteWord> favoriteWords = database.favoriteWordDao().getFavoritesByUser(userEmail);
             runOnUiThread(() -> {
                 if (favoriteWords.isEmpty()) {
                     textViewEmpty.setVisibility(View.VISIBLE);

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "8107de6bcfc3cd13a493174e62c37f5f",
+    "identityHash": "08cffc249b2d3d5618125128d7a90296",
     "entities": [
       {
         "tableName": "favorite_words",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `word` TEXT, `definition` TEXT, `phonetic` TEXT, `synonyms` TEXT, `timestamp` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `word` TEXT, `definition` TEXT, `phonetic` TEXT, `synonyms` TEXT, `timestamp` INTEGER NOT NULL, `userEmail` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,6 +43,12 @@
             "columnName": "timestamp",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "userEmail",
+            "columnName": "userEmail",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -58,7 +64,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8107de6bcfc3cd13a493174e62c37f5f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '08cffc249b2d3d5618125128d7a90296')"
     ]
   }
 }

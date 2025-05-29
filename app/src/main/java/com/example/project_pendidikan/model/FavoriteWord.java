@@ -13,6 +13,7 @@ public class FavoriteWord {
     private String phonetic;
     private String synonyms;
     private long timestamp;
+    private String userEmail; // Email pengguna yang menambahkan ke favorit
 
     @Ignore
     public FavoriteWord(String word, String definition, String phonetic) {
@@ -21,14 +22,26 @@ public class FavoriteWord {
         this.phonetic = phonetic;
         this.synonyms = "";
         this.timestamp = System.currentTimeMillis();
+        this.userEmail = "";
     }
 
+    @Ignore
     public FavoriteWord(String word, String definition, String phonetic, String synonyms) {
         this.word = word;
         this.definition = definition;
         this.phonetic = phonetic;
         this.synonyms = synonyms != null ? synonyms : "";
         this.timestamp = System.currentTimeMillis();
+        this.userEmail = "";
+    }
+    
+    public FavoriteWord(String word, String definition, String phonetic, String synonyms, String userEmail) {
+        this.word = word;
+        this.definition = definition;
+        this.phonetic = phonetic;
+        this.synonyms = synonyms != null ? synonyms : "";
+        this.timestamp = System.currentTimeMillis();
+        this.userEmail = userEmail != null ? userEmail : "";
     }
 
     public int getId() {
@@ -77,5 +90,13 @@ public class FavoriteWord {
 
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
+    }
+    
+    public String getUserEmail() {
+        return userEmail != null ? userEmail : "";
+    }
+    
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail != null ? userEmail : "";
     }
 }

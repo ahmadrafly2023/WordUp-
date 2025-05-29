@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/popupFeedback"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    android:visibility="visible">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="24dp">
+
+        <ImageView
+            android:id="@+id/imageFeedbackIcon"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:src="@drawable/ic_thumbs_up"
+            android:padding="8dp"
+            android:background="@drawable/circle_background" />
+
+        <TextView
+            android:id="@+id/textFeedbackMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp"
+            android:text="Benar! Bagus sekali."
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#4CAF50"
+            android:gravity="center" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/buttonNextPopup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="NEXT QUESTION"
+            android:textSize="16sp"
+            android:backgroundTint="@color/green_500"
+            app:cornerRadius="8dp" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

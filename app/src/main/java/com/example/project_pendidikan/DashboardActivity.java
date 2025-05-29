@@ -376,7 +376,10 @@ public class DashboardActivity extends AppCompatActivity {
                     }
                     String synonyms = synonymsBuilder.toString();
                     
-                    FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic, synonyms);
+                    // Dapatkan email pengguna yang sedang login
+                    String userEmail = getSharedPreferences("UserPref", MODE_PRIVATE).getString("email", "");
+                    // Buat objek FavoriteWord dengan menyertakan email pengguna
+                    FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic, synonyms, userEmail);
                     database.favoriteWordDao().insert(newFavorite);
                     runOnUiThread(() -> {
                         fabFavorite.setImageResource(android.R.drawable.btn_star_big_on);
