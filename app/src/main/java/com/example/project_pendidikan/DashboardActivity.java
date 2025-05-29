@@ -50,9 +50,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,6 +60,9 @@ import androidx.core.content.ContextCompat;
 import android.content.SharedPreferences;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.android.material.card.MaterialCardView;
 
@@ -106,11 +106,15 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        // Get user email from intent and save to SharedPreferences
+        // Get user email and name from intent and save to SharedPreferences
         String userEmail = getIntent().getStringExtra("USER_EMAIL");
+        String userName = getIntent().getStringExtra("USER_NAME");
         if (userEmail != null && !userEmail.isEmpty()) {
             SharedPreferences.Editor editor = getSharedPreferences("UserPref", MODE_PRIVATE).edit();
             editor.putString("email", userEmail);
+            if (userName != null && !userName.isEmpty()) {
+                editor.putString("name", userName);
+            }
             editor.apply();
         }
 
@@ -118,11 +122,7 @@ public class DashboardActivity extends AppCompatActivity {
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         
-        // Set title with user name if available
-        String userName = getIntent().getStringExtra("USER_NAME");
-        if (userName != null && !userName.isEmpty()) {
-            toolbar.setTitle("Welcome, " + userName);
-        }
+        // Title will be set in loadUserProgress method
 
         // Initialize UI components
         editTextSearch = findViewById(R.id.editTextSearch);
@@ -142,6 +142,16 @@ public class DashboardActivity extends AppCompatActivity {
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
         dictionaryService = DictionaryApiClient.getClient().create(WordsApiService.class);
+        
+        // Check if we have a word to search from intent (from FavoriteDetailActivity)
+        String wordToSearch = getIntent().getStringExtra("WORD_TO_SEARCH");
+        if (wordToSearch != null && !wordToSearch.isEmpty()) {
+            // Delay slightly to ensure UI is fully initialized
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                editTextSearch.setText(wordToSearch);
+                searchWord(wordToSearch);
+            }, 300);
+        }
 
         // Setup RecyclerView
         recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(this));
@@ -238,10 +248,10 @@ public class DashboardActivity extends AppCompatActivity {
         favoritesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                    String wordToSearch = result.getData().getStringExtra("WORD_TO_SEARCH");
-                    if (wordToSearch != null) {
-                        editTextSearch.setText(wordToSearch);
-                        searchWord(wordToSearch);
+                    String searchTerm = result.getData().getStringExtra("WORD_TO_SEARCH");
+                    if (searchTerm != null) {
+                        editTextSearch.setText(searchTerm);
+                        searchWord(searchTerm);
                     }
                 }
             });
@@ -585,8 +595,18 @@ public class DashboardActivity extends AppCompatActivity {
      * Load user progress from SharedPreferences and update UI
      */
     private void loadUserProgress() {
+        // Get user email from shared preferences
+        SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
+        String userEmail = userPrefs.getString("email", "");
+        String userName = getSharedPreferences("UserPref", MODE_PRIVATE).getString("name", "User");
+        
+        // Load progress using email as part of the key
         SharedPreferences prefs = getSharedPreferences("ProgressPrefs", MODE_PRIVATE);
-        int level = prefs.getInt("level", 1);
+        int level = prefs.getInt(userEmail + "_level", 1);
+        
+        // Update welcome message with user name
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Welcome, " + userName);
         
         // Update level display
         textViewLevel.setText("Level " + level);

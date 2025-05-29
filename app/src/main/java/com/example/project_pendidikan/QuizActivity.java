@@ -118,20 +118,35 @@ public class QuizActivity extends AppCompatActivity {
     }
     
     private void loadUserProgress() {
+        // Get user email from shared preferences
+        SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
+        String userEmail = userPrefs.getString("email", "");
+        
+        // Load progress using email as part of the key
         SharedPreferences prefs = getSharedPreferences(PROGRESS_PREFS, MODE_PRIVATE);
         userProgress = new UserProgress();
-        userProgress.setLevel(prefs.getInt("level", 1));
-        userProgress.setTotalCorrectAnswers(prefs.getInt("totalCorrectAnswers", 0));
-        userProgress.setQuizzesTaken(prefs.getInt("quizzesTaken", 0));
-        userProgress.setCurrentStreak(prefs.getInt("currentStreak", 0));
+        userProgress.setUserEmail(userEmail);
+        userProgress.setLevel(prefs.getInt(userEmail + "_level", 1));
+        userProgress.setTotalCorrectAnswers(prefs.getInt(userEmail + "_totalCorrectAnswers", 0));
+        userProgress.setQuizzesTaken(prefs.getInt(userEmail + "_quizzesTaken", 0));
+        userProgress.setCurrentStreak(prefs.getInt(userEmail + "_currentStreak", 0));
     }
     
     private void saveUserProgress() {
+        String userEmail = userProgress.getUserEmail();
+        if (userEmail.isEmpty()) {
+            // Fallback to get email if not set in userProgress
+            SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
+            userEmail = userPrefs.getString("email", "");
+            userProgress.setUserEmail(userEmail);
+        }
+        
+        // Save progress using email as part of the key
         SharedPreferences.Editor editor = getSharedPreferences(PROGRESS_PREFS, MODE_PRIVATE).edit();
-        editor.putInt("level", userProgress.getLevel());
-        editor.putInt("totalCorrectAnswers", userProgress.getTotalCorrectAnswers());
-        editor.putInt("quizzesTaken", userProgress.getQuizzesTaken());
-        editor.putInt("currentStreak", userProgress.getCurrentStreak());
+        editor.putInt(userEmail + "_level", userProgress.getLevel());
+        editor.putInt(userEmail + "_totalCorrectAnswers", userProgress.getTotalCorrectAnswers());
+        editor.putInt(userEmail + "_quizzesTaken", userProgress.getQuizzesTaken());
+        editor.putInt(userEmail + "_currentStreak", userProgress.getCurrentStreak());
         editor.apply();
     }
     

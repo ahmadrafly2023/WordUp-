@@ -1,16 +1,26 @@
 package com.example.project_pendidikan.model;
 
 public class UserProgress {
+    private String userEmail;
     private int level;
     private int totalCorrectAnswers;
     private int quizzesTaken;
     private int currentStreak;
     
     public UserProgress() {
+        this.userEmail = "";
         this.level = 1;
         this.totalCorrectAnswers = 0;
         this.quizzesTaken = 0;
         this.currentStreak = 0;
+    }
+    
+    public String getUserEmail() {
+        return userEmail;
+    }
+    
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
     
     public int getLevel() {

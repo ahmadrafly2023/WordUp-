@@ -62,12 +62,18 @@ public class AchievementsActivity extends AppCompatActivity {
     }
     
     private void loadUserProgress() {
+        // Get user email from shared preferences
+        SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
+        String userEmail = userPrefs.getString("email", "");
+        
+        // Load progress using email as part of the key
         SharedPreferences prefs = getSharedPreferences(PROGRESS_PREFS, MODE_PRIVATE);
         userProgress = new UserProgress();
-        userProgress.setLevel(prefs.getInt("level", 1));
-        userProgress.setTotalCorrectAnswers(prefs.getInt("totalCorrectAnswers", 0));
-        userProgress.setQuizzesTaken(prefs.getInt("quizzesTaken", 0));
-        userProgress.setCurrentStreak(prefs.getInt("currentStreak", 0));
+        userProgress.setUserEmail(userEmail);
+        userProgress.setLevel(prefs.getInt(userEmail + "_level", 1));
+        userProgress.setTotalCorrectAnswers(prefs.getInt(userEmail + "_totalCorrectAnswers", 0));
+        userProgress.setQuizzesTaken(prefs.getInt(userEmail + "_quizzesTaken", 0));
+        userProgress.setCurrentStreak(prefs.getInt(userEmail + "_currentStreak", 0));
     }
     
     private void updateUI() {
