@@ -64,6 +64,7 @@ import android.content.SharedPreferences;
 import android.text.Editable;
 import android.text.TextWatcher;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.card.MaterialCardView;
 
 public class DashboardActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> favoritesLauncher;
@@ -74,6 +75,10 @@ public class DashboardActivity extends AppCompatActivity {
     private TextInputEditText editTextSearch;
     private CardView cardViewResult;
     private TextView textViewWord;
+    private TextView textViewLevel;
+    private MaterialCardView cardQuiz;
+    private MaterialCardView cardAchievements;
+    private MaterialCardView cardLevel;
 
     private RecyclerView recyclerViewDefinitions;
     private ChipGroup chipGroupSynonyms;
@@ -123,6 +128,10 @@ public class DashboardActivity extends AppCompatActivity {
         editTextSearch = findViewById(R.id.editTextSearch);
         cardViewResult = findViewById(R.id.cardViewResult);
         textViewWord = findViewById(R.id.textViewWord);
+        textViewLevel = findViewById(R.id.textViewLevel);
+        cardQuiz = findViewById(R.id.cardQuiz);
+        cardAchievements = findViewById(R.id.cardAchievements);
+        cardLevel = findViewById(R.id.cardLevel);
 
         recyclerViewDefinitions = findViewById(R.id.recyclerViewDefinitions);
         chipGroupSynonyms = findViewById(R.id.chipGroupSynonyms);
@@ -219,6 +228,12 @@ public class DashboardActivity extends AppCompatActivity {
             return false;
         });
 
+        // Set up click listeners for feature buttons
+        setupFeatureButtons();
+        
+        // Load and display user progress
+        loadUserProgress();
+        
         // Initialize activity result launcher
         favoritesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
@@ -541,6 +556,47 @@ public class DashboardActivity extends AppCompatActivity {
         
         // Hide refresh button
         btnRefresh.setVisibility(View.GONE);
+    }
+    
+    /**
+     * Set up click listeners for Quiz, Achievements, and Level buttons
+     */
+    private void setupFeatureButtons() {
+        // Quiz button click listener
+        cardQuiz.setOnClickListener(v -> {
+            Intent quizIntent = new Intent(DashboardActivity.this, QuizActivity.class);
+            startActivity(quizIntent);
+        });
+        
+        // Achievements button click listener
+        cardAchievements.setOnClickListener(v -> {
+            Intent achievementsIntent = new Intent(DashboardActivity.this, AchievementsActivity.class);
+            startActivity(achievementsIntent);
+        });
+        
+        // Level button click listener (shows achievements screen)
+        cardLevel.setOnClickListener(v -> {
+            Intent achievementsIntent = new Intent(DashboardActivity.this, AchievementsActivity.class);
+            startActivity(achievementsIntent);
+        });
+    }
+    
+    /**
+     * Load user progress from SharedPreferences and update UI
+     */
+    private void loadUserProgress() {
+        SharedPreferences prefs = getSharedPreferences("ProgressPrefs", MODE_PRIVATE);
+        int level = prefs.getInt("level", 1);
+        
+        // Update level display
+        textViewLevel.setText("Level " + level);
+    }
+    
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh user progress when returning to dashboard
+        loadUserProgress();
     }
 
 }

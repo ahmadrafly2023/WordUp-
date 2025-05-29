@@ -47,6 +47,14 @@
             android:name=".FavoriteDetailActivity"
             android:exported="false"
             android:theme="@style/Theme.Project_pendidikan" />
+        <activity
+            android:name=".QuizActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Project_pendidikan" />
+        <activity
+            android:name=".AchievementsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Project_pendidikan" />
     </application>
 
 </manifest>
