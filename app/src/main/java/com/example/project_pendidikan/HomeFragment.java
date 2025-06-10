@@ -41,7 +41,7 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Initialize views
+
         editTextSearch = view.findViewById(R.id.editTextSearch);
         cardViewResult = view.findViewById(R.id.cardViewResult);
         textViewWord = view.findViewById(R.id.textViewWord);
@@ -49,12 +49,11 @@ public class HomeFragment extends Fragment {
         recyclerViewDefinitions = view.findViewById(R.id.recyclerViewDefinitions);
         chipGroupSynonyms = view.findViewById(R.id.chipGroupSynonyms);
 
-        // Setup RecyclerView
+
         recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(requireContext()));
         definitionAdapter = new DefinitionAdapter();
         recyclerViewDefinitions.setAdapter(definitionAdapter);
 
-        // Setup search functionality
         editTextSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
@@ -70,8 +69,7 @@ public class HomeFragment extends Fragment {
             return;
         }
 
-        // TODO: Implement dictionary API call
-        // For now, just show some dummy data
+
         showDummyResults(word);
     }
 
@@ -80,14 +78,14 @@ public class HomeFragment extends Fragment {
         textViewWord.setText(word);
         textViewPhonetic.setText("/ˈdʌmi/");
 
-        // Add dummy definitions
+
         List<Definition> definitions = List.of(
             new Definition("noun", "A placeholder or mock-up used for testing"),
             new Definition("adjective", "Serving as a temporary substitute")
         );
         definitionAdapter.setDefinitions(definitions);
 
-        // Add dummy synonyms
+
         chipGroupSynonyms.removeAllViews();
         String[] synonyms = {"mock", "placeholder", "temporary"};
         for (String synonym : synonyms) {

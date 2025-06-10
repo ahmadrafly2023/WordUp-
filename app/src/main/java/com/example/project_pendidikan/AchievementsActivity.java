@@ -32,12 +32,12 @@ public class AchievementsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_achievements);
         
-        // Initialize toolbar
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
         
-        // Initialize views
+
         textViewCurrentLevel = findViewById(R.id.textViewCurrentLevel);
         progressBarLevel = findViewById(R.id.progressBarLevel);
         textViewTotalCorrect = findViewById(R.id.textViewTotalCorrect);
@@ -47,27 +47,27 @@ public class AchievementsActivity extends AppCompatActivity {
         imageAchievement2 = findViewById(R.id.imageAchievement2);
         imageAchievement3 = findViewById(R.id.imageAchievement3);
         
-        // Load user progress
+
         loadUserProgress();
         
-        // Update UI
+
         updateUI();
     }
     
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data when activity resumes
+
         loadUserProgress();
         updateUI();
     }
     
     private void loadUserProgress() {
-        // Get user email from shared preferences
+
         SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
         String userEmail = userPrefs.getString("email", "");
         
-        // Load progress using email as part of the key
+
         SharedPreferences prefs = getSharedPreferences(PROGRESS_PREFS, MODE_PRIVATE);
         userProgress = new UserProgress();
         userProgress.setUserEmail(userEmail);
@@ -78,20 +78,20 @@ public class AchievementsActivity extends AppCompatActivity {
     }
     
     private void updateUI() {
-        // Update level information
+
         textViewCurrentLevel.setText("Level " + userProgress.getLevel());
         
-        // Calculate progress to next level (every 10 correct answers is a level)
+
         int correctAnswersInCurrentLevel = userProgress.getTotalCorrectAnswers() % 10;
         int progressToNextLevel = correctAnswersInCurrentLevel * 10; // 0-100%
         progressBarLevel.setProgress(progressToNextLevel);
         
-        // Update stats
+
         textViewTotalCorrect.setText(String.valueOf(userProgress.getTotalCorrectAnswers()));
         textViewQuizzesTaken.setText(String.valueOf(userProgress.getQuizzesTaken()));
         textViewCurrentStreak.setText(String.valueOf(userProgress.getCurrentStreak()));
         
-        // Update achievements
+
         updateAchievements();
     }
     

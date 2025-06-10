@@ -30,31 +30,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before super.onCreate
+
         SharedPreferences themePreferences = getSharedPreferences(THEME_PREFS, MODE_PRIVATE);
         boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
-        AppCompatDelegate.setDefaultNightMode(isNightMode ? 
-            AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-            
+        AppCompatDelegate.setDefaultNightMode(isNightMode ?
+                AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // Initialize DatabaseHelper first
+
         databaseHelper = new DatabaseHelper(this);
 
-        // Check if user is already logged in
+
         SharedPreferences userPrefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         String savedEmail = userPrefs.getString(KEY_EMAIL, "");
         if (!savedEmail.isEmpty() && databaseHelper.isEmailExists(savedEmail)) {
-            // User is already logged in, go to dashboard
+
             String userName = databaseHelper.getUserName(savedEmail);
             startDashboard(userName, savedEmail);
             finish();
             return;
         }
 
-        // Initialize views only if not auto-logging in
+
         initializeViews();
     }
 

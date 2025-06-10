@@ -19,7 +19,7 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before super.onCreate
+
         SharedPreferences themePreferences = getSharedPreferences(THEME_PREFS, MODE_PRIVATE);
         boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isNightMode ? 
@@ -43,13 +43,13 @@ public class SplashActivity extends AppCompatActivity {
 
         Intent intent;
         if (!savedEmail.isEmpty() && databaseHelper.isEmailExists(savedEmail)) {
-            // User is already logged in
+
             String userName = databaseHelper.getUserName(savedEmail);
             intent = new Intent(SplashActivity.this, DashboardActivity.class);
             intent.putExtra("USER_NAME", userName);
             intent.putExtra("USER_EMAIL", savedEmail);
         } else {
-            // User needs to login
+
             intent = new Intent(SplashActivity.this, MainActivity.class);
         }
 

@@ -97,7 +97,7 @@ public class DashboardActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Apply theme before super.onCreate
+
         themePreferences = getSharedPreferences(THEME_PREFS, MODE_PRIVATE);
         boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
         AppCompatDelegate.setDefaultNightMode(isNightMode ? 
@@ -106,7 +106,7 @@ public class DashboardActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        // Get user email and name from intent and save to SharedPreferences
+
         String userEmail = getIntent().getStringExtra("USER_EMAIL");
         String userName = getIntent().getStringExtra("USER_NAME");
         if (userEmail != null && !userEmail.isEmpty()) {
@@ -118,13 +118,12 @@ public class DashboardActivity extends AppCompatActivity {
             editor.apply();
         }
 
-        // Initialize views
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         
-        // Title will be set in loadUserProgress method
 
-        // Initialize UI components
+
         editTextSearch = findViewById(R.id.editTextSearch);
         cardViewResult = findViewById(R.id.cardViewResult);
         textViewWord = findViewById(R.id.textViewWord);
@@ -138,27 +137,27 @@ public class DashboardActivity extends AppCompatActivity {
         fabFavorite = findViewById(R.id.fabFavorite);
         btnRefresh = findViewById(R.id.btnRefresh);
 
-        // Initialize database and services
+
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
         dictionaryService = DictionaryApiClient.getClient().create(WordsApiService.class);
         
-        // Check if we have a word to search from intent (from FavoriteDetailActivity)
+
         String wordToSearch = getIntent().getStringExtra("WORD_TO_SEARCH");
         if (wordToSearch != null && !wordToSearch.isEmpty()) {
-            // Delay slightly to ensure UI is fully initialized
+
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 editTextSearch.setText(wordToSearch);
                 searchWord(wordToSearch);
             }, 300);
         }
 
-        // Setup RecyclerView
+
         recyclerViewDefinitions.setLayoutManager(new LinearLayoutManager(this));
         definitionAdapter = new DefinitionAdapter(new ArrayList<>());
         recyclerViewDefinitions.setAdapter(definitionAdapter);
 
-        // Setup refresh button
+
         btnRefresh.setOnClickListener(v -> {
             if (currentWord != null) {
                 searchWord(currentWord);
@@ -171,7 +170,7 @@ public class DashboardActivity extends AppCompatActivity {
         definitionAdapter = new DefinitionAdapter(new ArrayList<>());
         recyclerViewDefinitions.setAdapter(definitionAdapter);
 
-        // Setup search input
+
         editTextSearch.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH ||
                     (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
@@ -184,14 +183,14 @@ public class DashboardActivity extends AppCompatActivity {
             return false;
         });
         
-        // Setup clear text functionality
+
         TextInputLayout searchInputLayout = findViewById(R.id.searchInputLayout);
         searchInputLayout.setEndIconOnClickListener(v -> {
-            // The clear button already clears the text, but we need to hide results
+
             resetSearchResults();
         });
         
-        // Add text watcher to detect when text is cleared
+
         editTextSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -207,20 +206,20 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-        // Setup favorite button
+
         fabFavorite.setOnClickListener(v -> toggleFavorite());
         fabFavorite.hide();
 
-        // Initialize favorites launcher
+
         favoritesLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if (result.getResultCode() == Activity.RESULT_OK) {
-                        // Handle any updates needed after returning from favorites
+
                     }
                 });
 
-        // Setup bottom navigation
+
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_nav_view);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -238,13 +237,13 @@ public class DashboardActivity extends AppCompatActivity {
             return false;
         });
 
-        // Set up click listeners for feature buttons
+
         setupFeatureButtons();
         
-        // Load and display user progress
+
         loadUserProgress();
         
-        // Initialize activity result launcher
+
         favoritesLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
@@ -264,11 +263,11 @@ public class DashboardActivity extends AppCompatActivity {
         recyclerViewDefinitions = findViewById(R.id.recyclerViewDefinitions);
         fabFavorite = findViewById(R.id.fabFavorite);
 
-        // Initialize database
+
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
         
-        // Initialize Handler for UI updates
+
         uiHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
@@ -289,7 +288,7 @@ public class DashboardActivity extends AppCompatActivity {
             }
         };
 
-        // Hide results initially
+
         cardViewResult.setVisibility(View.GONE);
         fabFavorite.hide();
     }
@@ -297,7 +296,7 @@ public class DashboardActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.top_app_bar, menu);
-        // Update theme icon based on current mode
+
         updateThemeIcon(menu.findItem(R.id.action_toggle_theme));
         return true;
     }
@@ -313,7 +312,7 @@ public class DashboardActivity extends AppCompatActivity {
             editor.clear();
             editor.apply();
 
-            // Navigate back to MainActivity
+
             Intent intent = new Intent(this, MainActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
@@ -327,11 +326,11 @@ public class DashboardActivity extends AppCompatActivity {
         boolean isNightMode = themePreferences.getBoolean(KEY_NIGHT_MODE, false);
         themePreferences.edit().putBoolean(KEY_NIGHT_MODE, !isNightMode).apply();
         
-        // Apply the new theme
+
         AppCompatDelegate.setDefaultNightMode(!isNightMode ? 
             AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
         
-        // Recreate the activity for the theme to take effect
+
         recreate();
     }
 
@@ -352,21 +351,21 @@ public class DashboardActivity extends AppCompatActivity {
             try {
                 FavoriteWord existingFavorite = database.favoriteWordDao().findByWord(currentWord);
                 if (existingFavorite != null) {
-                    // Remove from favorites
+
                     database.favoriteWordDao().delete(existingFavorite);
                     runOnUiThread(() -> {
                         fabFavorite.setImageResource(android.R.drawable.btn_star_big_off);
                         Toast.makeText(DashboardActivity.this, "Removed from favorites", Toast.LENGTH_SHORT).show();
                     });
                 } else {
-                    // Add to favorites
+
                     String definition = "";
                     if (definitionAdapter != null && !definitionAdapter.getDefinitions().isEmpty()) {
                         definition = definitionAdapter.getDefinitions().get(0).getDefinition();
                     }
                     String phonetic = "";
-                    
-                    // Get synonyms
+
+
                     StringBuilder synonymsBuilder = new StringBuilder();
                     int chipCount = chipGroupSynonyms.getChildCount();
                     for (int i = 0; i < chipCount; i++) {
@@ -376,9 +375,9 @@ public class DashboardActivity extends AppCompatActivity {
                     }
                     String synonyms = synonymsBuilder.toString();
                     
-                    // Dapatkan email pengguna yang sedang login
+
                     String userEmail = getSharedPreferences("UserPref", MODE_PRIVATE).getString("email", "");
-                    // Buat objek FavoriteWord dengan menyertakan email pengguna
+
                     FavoriteWord newFavorite = new FavoriteWord(currentWord, definition, phonetic, synonyms, userEmail);
                     database.favoriteWordDao().insert(newFavorite);
                     runOnUiThread(() -> {
@@ -403,7 +402,7 @@ public class DashboardActivity extends AppCompatActivity {
             showError("No internet connection. Please check your connection and try again.");
             btnRefresh.setVisibility(View.VISIBLE);
             
-            // Show offline message in card
+
             cardViewResult.setVisibility(View.VISIBLE);
             textViewWord.setText(currentWord);
             TextView offlineMessage = new TextView(this);
@@ -413,7 +412,7 @@ public class DashboardActivity extends AppCompatActivity {
             
             LinearLayout contentLayout = cardViewResult.findViewById(R.id.content_layout);
             if (contentLayout != null) {
-                // Remove any existing offline message first
+
                 for (int i = 0; i < contentLayout.getChildCount(); i++) {
                     View child = contentLayout.getChildAt(i);
                     if (child instanceof TextView && ((TextView) child).getText().toString().contains("offline")) {
@@ -428,7 +427,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         btnRefresh.setVisibility(View.GONE);
 
-        // Show loading state
+
         cardViewResult.setVisibility(View.GONE);
         fabFavorite.hide();
 
@@ -466,13 +465,30 @@ public class DashboardActivity extends AppCompatActivity {
             return;
         }
 
+        btnRefresh.setVisibility(View.GONE);
+        LinearLayout contentLayout = cardViewResult.findViewById(R.id.content_layout);
+        if (contentLayout != null) {
+            for (int i = contentLayout.getChildCount() - 1; i >= 0; i--) {
+                View child = contentLayout.getChildAt(i);
+                if (child instanceof TextView) {
+                    TextView textView = (TextView) child;
+                    String text = textView.getText().toString();
+                    if (text.contains("offline") || text.contains("connection") ||
+                            text.contains("refresh")) {
+                        contentLayout.removeView(child);
+                    }
+                }
+            }
+        }
+
+
         currentWord = wordResponse.getWord();
         textViewWord.setText(wordResponse.getWord());
 
-        // Clear previous definitions
+
         definitionAdapter.clearDefinitions();
 
-        // Add all meanings and their definitions
+
         for (WordResponse.Meaning meaning : wordResponse.getMeanings()) {
             for (WordResponse.Definition apiDef : meaning.getDefinitions()) {
                 Definition definition = new Definition(
@@ -483,7 +499,7 @@ public class DashboardActivity extends AppCompatActivity {
                 definitionAdapter.addDefinition(definition);
             }
 
-            // Add synonyms for this meaning
+
             if (meaning.getSynonyms() != null && !meaning.getSynonyms().isEmpty()) {
                 chipGroupSynonyms.removeAllViews();
                 for (String synonym : meaning.getSynonyms()) {
@@ -516,7 +532,7 @@ public class DashboardActivity extends AppCompatActivity {
             
             if (message.contains("internet") || message.contains("Network error")) {
                 btnRefresh.setVisibility(View.VISIBLE);
-                // Show offline message in card
+
                 cardViewResult.setVisibility(View.VISIBLE);
                 textViewWord.setText(currentWord);
                 TextView offlineMessage = new TextView(this);
@@ -526,7 +542,7 @@ public class DashboardActivity extends AppCompatActivity {
                 
                 LinearLayout contentLayout = cardViewResult.findViewById(R.id.content_layout);
                 if (contentLayout != null) {
-                    // Remove any existing offline message first
+
                     for (int i = 0; i < contentLayout.getChildCount(); i++) {
                         View child = contentLayout.getChildAt(i);
                         if (child instanceof TextView && ((TextView) child).getText().toString().contains("offline")) {
@@ -598,27 +614,27 @@ public class DashboardActivity extends AppCompatActivity {
      * Load user progress from SharedPreferences and update UI
      */
     private void loadUserProgress() {
-        // Get user email from shared preferences
+
         SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
         String userEmail = userPrefs.getString("email", "");
         String userName = getSharedPreferences("UserPref", MODE_PRIVATE).getString("name", "User");
         
-        // Load progress using email as part of the key
+
         SharedPreferences prefs = getSharedPreferences("ProgressPrefs", MODE_PRIVATE);
         int level = prefs.getInt(userEmail + "_level", 1);
         
-        // Update welcome message with user name
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle("Welcome, " + userName);
         
-        // Update level display
+
         textViewLevel.setText("Level " + level);
     }
     
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh user progress when returning to dashboard
+
         loadUserProgress();
     }
 

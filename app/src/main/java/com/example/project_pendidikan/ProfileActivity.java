@@ -37,7 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
         editTextPassword = findViewById(R.id.editTextPassword);
         MaterialButton buttonSave = findViewById(R.id.buttonSave);
 
-        // Load current user data
+
         loadUserData();
 
         buttonSave.setOnClickListener(v -> saveChanges());
@@ -65,13 +65,13 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-        // Check if new email already exists (except for current user)
+
         if (!newEmail.equals(currentEmail) && databaseHelper.isEmailExists(newEmail)) {
             Toast.makeText(this, "Email already exists", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Update user data
+
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("name", newName);
@@ -84,7 +84,7 @@ public class ProfileActivity extends AppCompatActivity {
         db.close();
 
         if (rowsAffected > 0) {
-            // Update shared preferences with new email
+            // Update shared preferences
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString(KEY_EMAIL, newEmail);
             editor.apply();

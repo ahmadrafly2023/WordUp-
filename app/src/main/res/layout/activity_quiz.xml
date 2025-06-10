@@ -120,7 +120,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Pilihlah jawaban yang tepat"
+                        android:text="Choose the correct answer"
                         android:textSize="16sp" />
 
                     <TextView

@@ -86,27 +86,27 @@ public class QuizActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
         
-        // Initialize toolbar
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        // Disable navigation click to prevent auto-finish
+
         toolbar.setNavigationOnClickListener(v -> {
-            // Tampilkan dialog konfirmasi jika ingin keluar dari quiz
+
             new AlertDialog.Builder(this)
-                .setTitle("Keluar dari Quiz?")
-                .setMessage("Apakah kamu yakin ingin keluar? Progres quiz tidak akan disimpan.")
-                .setPositiveButton("Ya", (dialog, which) -> finish())
-                .setNegativeButton("Tidak", null)
+                .setTitle("Exit Quiz?")
+                .setMessage("Are you sure you want to exit? Your quiz progress will not be saved.")
+                .setPositiveButton("Yes", (dialog, which) -> finish())
+                .setNegativeButton("No", null)
                 .show();
         });
         
-        // Initialize views
+
         textViewQuestionNumber = findViewById(R.id.textViewQuestionNumber);
         textViewScore = findViewById(R.id.textViewScore);
         progressBar = findViewById(R.id.progressBar);
         textViewQuizWord = findViewById(R.id.textViewQuizWord);
         
-        // Initialize option cards and their components
+
         optionCards[0] = findViewById(R.id.cardOption1);
         optionCards[1] = findViewById(R.id.cardOption2);
         optionCards[2] = findViewById(R.id.cardOption3);
@@ -127,28 +127,26 @@ public class QuizActivity extends AppCompatActivity {
         buttonNext = findViewById(R.id.buttonNext);
         imageEmotionFeedback = findViewById(R.id.imageEmotionFeedback);
         
-        // Load user progress
+
         loadUserProgress();
-        
-        // Initialize dictionary service
+
         dictionaryService = DictionaryApiClient.getClient().create(WordsApiService.class);
         
-        // Initialize popup feedback
+
         initPopupFeedback();
         
-        // Initialize popup quiz completed
+
         initQuizCompletedPopup();
         
-        // Load user progress
+
         loadUserProgress();
         
-        // Set up quiz words (common English words for the quiz)
+
         setupQuizWords();
         
-        // Generate quiz questions
+
         generateQuizQuestions();
-        
-        // Set up option card click listeners
+
         for (int i = 0; i < optionCards.length; i++) {
             final int index = i;
             optionCards[i].setOnClickListener(v -> {
@@ -156,17 +154,17 @@ public class QuizActivity extends AppCompatActivity {
             });
         }
         
-        // Set up button listeners
+
         buttonSubmit.setOnClickListener(v -> checkAnswer());
         buttonNext.setOnClickListener(v -> showNextQuestion());
     }
     
     private void loadUserProgress() {
-        // Get user email from shared preferences
+
         SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
         String userEmail = userPrefs.getString("email", "");
         
-        // Load progress using email as part of the key
+
         SharedPreferences prefs = getSharedPreferences(PROGRESS_PREFS, MODE_PRIVATE);
         userProgress = new UserProgress();
         userProgress.setUserEmail(userEmail);
@@ -179,13 +177,13 @@ public class QuizActivity extends AppCompatActivity {
     private void saveUserProgress() {
         String userEmail = userProgress.getUserEmail();
         if (userEmail.isEmpty()) {
-            // Fallback to get email if not set in userProgress
+
             SharedPreferences userPrefs = getSharedPreferences("UserPref", MODE_PRIVATE);
             userEmail = userPrefs.getString("email", "");
             userProgress.setUserEmail(userEmail);
         }
         
-        // Save progress using email as part of the key
+
         SharedPreferences.Editor editor = getSharedPreferences(PROGRESS_PREFS, MODE_PRIVATE).edit();
         editor.putInt(userEmail + "_level", userProgress.getLevel());
         editor.putInt(userEmail + "_totalCorrectAnswers", userProgress.getTotalCorrectAnswers());
@@ -217,7 +215,7 @@ public class QuizActivity extends AppCompatActivity {
     }
     
     private void generateQuizQuestions() {
-        // Start with the first word
+
         fetchWordDefinition(quizWords.get(0));
     }
     
@@ -236,7 +234,7 @@ public class QuizActivity extends AppCompatActivity {
             
             @Override
             public void onFailure(Call<List<WordResponse>> call, Throwable t) {
-                // If API call fails, use a fallback definition
+
                 createFallbackQuestion(word);
             }
         });
@@ -246,7 +244,7 @@ public class QuizActivity extends AppCompatActivity {
         String word = wordResponse.getWord();
         String correctDefinition = "";
         
-        // Get a definition from the word response
+
         if (wordResponse.getMeanings() != null && !wordResponse.getMeanings().isEmpty()) {
             WordResponse.Meaning meaning = wordResponse.getMeanings().get(0);
             if (meaning.getDefinitions() != null && !meaning.getDefinitions().isEmpty()) {
@@ -259,19 +257,19 @@ public class QuizActivity extends AppCompatActivity {
             return;
         }
         
-        // Generate incorrect options in Indonesian
+
         List<String> options = new ArrayList<>();
         options.add(correctDefinition);
         
-        // Add some fake definitions as distractors in Indonesian
-        options.add("Lawan kata dari " + word);
-        options.add("Jenis makanan yang berhubungan dengan " + word);
-        options.add("Tindakan yang dilakukan dengan " + word);
+        // Add some fake definitions
+        options.add("Antonym of " + word);
+        options.add("What type is related to " + word);
+        options.add("Actions taken with " + word);
         
-        // Shuffle options
+
         Collections.shuffle(options);
         
-        // Create quiz question
+
         QuizQuestion question = new QuizQuestion(word, correctDefinition, options);
         quizQuestions.add(question);
         
@@ -279,13 +277,13 @@ public class QuizActivity extends AppCompatActivity {
         if (quizQuestions.size() < QUIZ_SIZE && currentQuestionIndex + quizQuestions.size() < quizWords.size()) {
             fetchWordDefinition(quizWords.get(currentQuestionIndex + quizQuestions.size()));
         } else {
-            // Start the quiz
+
             displayCurrentQuestion();
         }
     }
     
     private void createFallbackQuestion(String word) {
-        // Create a fallback question with predefined definitions in Indonesian
+
         String correctDefinition = "";
         
         // Simple fallback definitions based on the word (in Indonesian)
@@ -340,17 +338,17 @@ public class QuizActivity extends AppCompatActivity {
                 break;
         }
         
-        // Generate incorrect options in Indonesian
+        // Generate incorrect options
         List<String> options = new ArrayList<>();
         options.add(correctDefinition);
-        options.add("Lawan kata dari " + word);
-        options.add("Jenis makanan yang berhubungan dengan " + word);
-        options.add("Tindakan yang dilakukan dengan " + word);
+        options.add("Antonym of " + word);
+        options.add("What type is related to " + word);
+        options.add("Actions taken with " + word);
         
-        // Shuffle options
+
         Collections.shuffle(options);
         
-        // Create quiz question
+
         QuizQuestion question = new QuizQuestion(word, correctDefinition, options);
         quizQuestions.add(question);
         
@@ -358,7 +356,7 @@ public class QuizActivity extends AppCompatActivity {
         if (quizQuestions.size() < QUIZ_SIZE && currentQuestionIndex + quizQuestions.size() < quizWords.size()) {
             fetchWordDefinition(quizWords.get(currentQuestionIndex + quizQuestions.size()));
         } else {
-            // Start the quiz
+
             displayCurrentQuestion();
         }
     }
@@ -367,13 +365,13 @@ public class QuizActivity extends AppCompatActivity {
      * Handle option selection
      */
     private void selectOption(int index) {
-        // Reset all options first
+
         for (int i = 0; i < optionCards.length; i++) {
             optionCards[i].setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
             optionImages[i].setImageResource(android.R.drawable.radiobutton_off_background);
         }
         
-        // Highlight the selected option
+
         selectedOptionIndex = index;
         optionCards[index].setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_green_light));
         optionImages[index].setImageResource(android.R.drawable.radiobutton_on_background);
@@ -383,15 +381,14 @@ public class QuizActivity extends AppCompatActivity {
         if (currentQuestionIndex < quizQuestions.size()) {
             QuizQuestion currentQuestion = quizQuestions.get(currentQuestionIndex);
             
-            // Update question number and progress
+
             textViewQuestionNumber.setText((currentQuestionIndex + 1) + "/" + QUIZ_SIZE);
             textViewScore.setText(String.valueOf(score));
             progressBar.setProgress((currentQuestionIndex + 1) * 100 / QUIZ_SIZE);
-            
-            // Display word
+
             textViewQuizWord.setText(currentQuestion.getWord());
             
-            // Set options
+
             List<String> options = currentQuestion.getOptions();
             for (int i = 0; i < optionCards.length; i++) {
                 if (i < options.size()) {
@@ -399,7 +396,7 @@ public class QuizActivity extends AppCompatActivity {
                 }
             }
             
-            // Reset UI state
+
             selectedOptionIndex = -1;
             for (int i = 0; i < optionCards.length; i++) {
                 optionCards[i].setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
@@ -408,7 +405,7 @@ public class QuizActivity extends AppCompatActivity {
             buttonSubmit.setEnabled(true);
             cardFeedback.setVisibility(View.GONE);
         } else {
-            // Quiz completed
+
             finishQuiz();
         }
     }
@@ -417,18 +414,18 @@ public class QuizActivity extends AppCompatActivity {
      * Initialize popup feedback
      */
     private void initPopupFeedback() {
-        // Buat builder untuk dialog
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         
-        // Inflate layout untuk dialog
+
         LayoutInflater inflater = LayoutInflater.from(this);
         dialogView = inflater.inflate(R.layout.popup_feedback, null);
         
-        // Initialize dialog components
+
         imageFeedbackIcon = dialogView.findViewById(R.id.imageFeedbackIcon);
         textFeedbackMessage = dialogView.findViewById(R.id.textFeedbackMessage);
         
-        // Initialize next button
+
         MaterialButton buttonNextPopup = dialogView.findViewById(R.id.buttonNextPopup);
         buttonNextPopup.setOnClickListener(v -> {
             // Dismiss dialog dan show next question
@@ -438,16 +435,16 @@ public class QuizActivity extends AppCompatActivity {
             showNextQuestion();
         });
         
-        // Set view ke dialog builder
+
         builder.setView(dialogView);
         
-        // Buat dialog
+
         feedbackDialog = builder.create();
         
-        // Atur agar dialog tidak bisa dibatalkan dengan tombol back
+
         feedbackDialog.setCancelable(false);
         
-        // Atur tampilan dialog agar transparan
+
         if (feedbackDialog.getWindow() != null) {
             feedbackDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
@@ -457,36 +454,36 @@ public class QuizActivity extends AppCompatActivity {
      * Show popup feedback
      */
     private void showPopupFeedback(boolean isCorrect) {
-        // Set icon and message based on answer
+
         if (isCorrect) {
             imageFeedbackIcon.setImageResource(R.drawable.ic_thumbs_up);
-            textFeedbackMessage.setText("Benar! Bagus sekali.");
+            textFeedbackMessage.setText("Right! Very good.");
             textFeedbackMessage.setTextColor(ContextCompat.getColor(this, R.color.green_500));
             dialogView.findViewById(R.id.popupFeedback).setBackgroundTintList(
                     ContextCompat.getColorStateList(this, R.color.green_200));
             dialogView.findViewById(R.id.buttonNextPopup).setBackgroundTintList(
                     ContextCompat.getColorStateList(this, R.color.green_500));
         } else {
-            // Gunakan ikon X berwarna putih yang lebih terlihat pada latar belakang merah
+
             imageFeedbackIcon.setImageResource(R.drawable.ic_wrong);
-            textFeedbackMessage.setText("Salah. Jawaban yang benar adalah: " + 
+            textFeedbackMessage.setText("Wrong. The correct answer is:" +
                     quizQuestions.get(currentQuestionIndex).getCorrectDefinition());
             textFeedbackMessage.setTextColor(ContextCompat.getColor(this, android.R.color.white));
-            // Gunakan warna merah yang lebih terang untuk latar belakang
+
             dialogView.findViewById(R.id.popupFeedback).setBackgroundTintList(
                     ContextCompat.getColorStateList(this, R.color.red_700));
-            // Gunakan warna merah gelap untuk tombol
+
             dialogView.findViewById(R.id.buttonNextPopup).setBackgroundTintList(
                     ContextCompat.getColorStateList(this, R.color.red_900));
             
-            // Pastikan tidak ada background pada ikon
+
             imageFeedbackIcon.setBackground(null);
         }
         
-        // Tampilkan dialog
+
         feedbackDialog.show();
         
-        // Atur ukuran dialog
+
         Window window = feedbackDialog.getWindow();
         if (window != null) {
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
@@ -499,13 +496,13 @@ public class QuizActivity extends AppCompatActivity {
     
     private void checkAnswer() {
         if (selectedOptionIndex == -1) {
-            Toast.makeText(this, "Silakan pilih jawaban", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select an answer", Toast.LENGTH_SHORT).show();
             return;
         }
         
         String selectedAnswer = textOptions[selectedOptionIndex].getText().toString();
         
-        // Get current question
+
         QuizQuestion currentQuestion = quizQuestions.get(currentQuestionIndex);
         boolean isCorrect = currentQuestion.isCorrectAnswer(selectedAnswer);
         
@@ -513,38 +510,37 @@ public class QuizActivity extends AppCompatActivity {
         if (isCorrect) {
             score++;
             textViewScore.setText(String.valueOf(score));
-            textViewFeedback.setText("Benar! Bagus sekali.");
+            textViewFeedback.setText("Right! Very good.");
             textViewFeedback.setTextColor(ContextCompat.getColor(this, android.R.color.holo_green_dark));
             imageEmotionFeedback.setImageResource(R.drawable.ic_emotion_happy);
-            
-            // Tampilkan popup dengan animasi
+
             cardFeedback.setCardBackgroundColor(ContextCompat.getColor(this, R.color.green_200));
             
             // Update user progress
             userProgress.incrementCorrectAnswers();
         } else {
-            textViewFeedback.setText("Salah. Jawaban yang benar adalah: " + currentQuestion.getCorrectDefinition());
+            textViewFeedback.setText("Wrong. The correct answer is: " + currentQuestion.getCorrectDefinition());
             textViewFeedback.setTextColor(ContextCompat.getColor(this, android.R.color.holo_red_dark));
             imageEmotionFeedback.setImageResource(R.drawable.ic_emotion_sad);
             
-            // Tampilkan popup dengan animasi
+
             cardFeedback.setCardBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_light));
             
-            // Reset streak on wrong answer
+
             userProgress.resetStreak();
         }
         
-        // Show popup feedback in center of screen
+
         showPopupFeedback(isCorrect);
         
         // Save progress
         saveUserProgress();
         
-        // Hide bottom feedback card - kita hanya menggunakan popup
+
         cardFeedback.setVisibility(View.GONE);
         buttonSubmit.setEnabled(false);
         
-        // Disable option cards
+
         for (MaterialCardView card : optionCards) {
             card.setEnabled(false);
         }
@@ -553,7 +549,7 @@ public class QuizActivity extends AppCompatActivity {
     private void showNextQuestion() {
         currentQuestionIndex++;
         
-        // Re-enable option cards
+
         for (MaterialCardView card : optionCards) {
             card.setEnabled(true);
         }
@@ -569,42 +565,42 @@ public class QuizActivity extends AppCompatActivity {
      * Initialize popup for quiz completion
      */
     private void initQuizCompletedPopup() {
-        // Buat builder untuk dialog
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         
-        // Inflate layout untuk dialog
+
         LayoutInflater inflater = LayoutInflater.from(this);
         quizCompletedView = inflater.inflate(R.layout.popup_quiz_completed, null);
         
-        // Initialize dialog components
+
         textFinalScore = quizCompletedView.findViewById(R.id.textFinalScore);
         
-        // Initialize view achievements button
+
         MaterialButton buttonViewAchievements = quizCompletedView.findViewById(R.id.buttonViewAchievements);
         buttonViewAchievements.setOnClickListener(v -> {
-            // Dismiss dialog dan buka halaman achievements
+
             if (quizCompletedDialog != null && quizCompletedDialog.isShowing()) {
                 quizCompletedDialog.dismiss();
             }
             
-            // Buka halaman achievements
+
             Intent intent = new Intent(QuizActivity.this, AchievementsActivity.class);
             startActivity(intent);
             
-            // Tutup activity quiz
+
             finish();
         });
         
-        // Set view ke dialog builder
+
         builder.setView(quizCompletedView);
         
-        // Buat dialog
+
         quizCompletedDialog = builder.create();
         
-        // Atur agar dialog tidak bisa dibatalkan dengan tombol back
+
         quizCompletedDialog.setCancelable(false);
         
-        // Atur tampilan dialog agar transparan
+
         if (quizCompletedDialog.getWindow() != null) {
             quizCompletedDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         }
@@ -614,13 +610,13 @@ public class QuizActivity extends AppCompatActivity {
      * Tampilkan popup quiz completed
      */
     private void showQuizCompletedPopup() {
-        // Set final score
-        textFinalScore.setText("Skor akhir: " + score + "/" + QUIZ_SIZE);
+
+        textFinalScore.setText("Final Score: " + score + "/" + QUIZ_SIZE);
         
-        // Tampilkan dialog
+
         quizCompletedDialog.show();
         
-        // Atur ukuran dialog
+
         Window window = quizCompletedDialog.getWindow();
         if (window != null) {
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
@@ -636,14 +632,14 @@ public class QuizActivity extends AppCompatActivity {
         userProgress.incrementQuizzesTaken();
         saveUserProgress();
         
-        // Tambahkan log untuk debugging
-        Log.d("QuizActivity", "Quiz selesai, menampilkan popup completed");
+
+        Log.d("QuizActivity", "Quiz completed, showing completed popup");
         
-        // Tampilkan popup quiz completed dengan delay kecil untuk memastikan UI thread siap
+
         new Handler(Looper.getMainLooper()).post(() -> {
             showQuizCompletedPopup();
         });
         
-        // PENTING: JANGAN panggil finish() di sini, biarkan user menekan tombol di popup
+
     }
 }

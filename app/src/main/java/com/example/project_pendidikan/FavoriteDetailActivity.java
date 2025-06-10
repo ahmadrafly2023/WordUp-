@@ -29,12 +29,12 @@ public class FavoriteDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_detail);
 
-        // Setup toolbar
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Get views
+
         TextView textViewWord = findViewById(R.id.textViewWord);
         TextView textViewPhonetic = findViewById(R.id.textViewPhonetic);
         TextView textViewDefinition = findViewById(R.id.textViewDefinition);
@@ -42,18 +42,18 @@ public class FavoriteDetailActivity extends AppCompatActivity {
         TextView labelSynonyms = findViewById(R.id.labelSynonyms);
         MaterialButton buttonSearch = findViewById(R.id.buttonSearch);
 
-        // Get extras from intent
+
         String word = getIntent().getStringExtra(EXTRA_WORD);
         String definition = getIntent().getStringExtra(EXTRA_DEFINITION);
         String phonetic = getIntent().getStringExtra(EXTRA_PHONETIC);
         String synonyms = getIntent().getStringExtra(EXTRA_SYNONYMS);
 
-        // Set data to views
+
         textViewWord.setText(word);
         textViewPhonetic.setText(phonetic);
         textViewDefinition.setText(definition);
 
-        // Handle synonyms
+
         if (synonyms != null && !synonyms.isEmpty()) {
             String[] synonymArray = synonyms.split(",");
             for (String synonym : synonymArray) {
@@ -81,10 +81,10 @@ public class FavoriteDetailActivity extends AppCompatActivity {
             chipGroupSynonyms.setVisibility(View.GONE);
         }
 
-        // Set toolbar title to the word
+
         getSupportActionBar().setTitle(word);
 
-        // Setup search button
+
         buttonSearch.setOnClickListener(v -> {
             if (isNetworkAvailable()) {
                 Intent intent = new Intent(this, DashboardActivity.class);

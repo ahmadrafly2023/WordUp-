@@ -26,14 +26,14 @@ public class FavoriteWordsActivity extends AppCompatActivity {
     private FavoriteWordAdapter adapter;
     private AppDatabase database;
     private ExecutorService executorService;
-    private String userEmail; // Email pengguna yang sedang login
+    private String userEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_words);
 
-        // Initialize views
+
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -44,16 +44,16 @@ public class FavoriteWordsActivity extends AppCompatActivity {
         recyclerViewFavorites = findViewById(R.id.recyclerViewFavorites);
         textViewEmpty = findViewById(R.id.textViewEmpty);
 
-        // Initialize database
+
         database = AppDatabase.getInstance(this);
         executorService = Executors.newSingleThreadExecutor();
         
-        // Dapatkan email pengguna yang sedang login
+
         userEmail = getSharedPreferences("UserPref", MODE_PRIVATE).getString("email", "");
 
-        // Setup RecyclerView
+
         adapter = new FavoriteWordAdapter(
-            // On item click listener
+
             word -> {
                 Intent intent = new Intent(this, FavoriteDetailActivity.class);
                 intent.putExtra(FavoriteDetailActivity.EXTRA_WORD, word.getWord());
@@ -62,11 +62,11 @@ public class FavoriteWordsActivity extends AppCompatActivity {
                 intent.putExtra(FavoriteDetailActivity.EXTRA_SYNONYMS, word.getSynonyms());
                 startActivity(intent);
             },
-            // On delete click listener
+
             word -> {
                 executorService.execute(() -> {
                     database.favoriteWordDao().delete(word);
-                    // Reload data after deletion
+
                     loadFavoriteWords();
                 });
             }
@@ -74,13 +74,13 @@ public class FavoriteWordsActivity extends AppCompatActivity {
         recyclerViewFavorites.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewFavorites.setAdapter(adapter);
 
-        // Load favorite words
+
         loadFavoriteWords();
     }
 
     private void loadFavoriteWords() {
         executorService.execute(() -> {
-            // Gunakan query yang memfilter berdasarkan userEmail
+
             List<FavoriteWord> favoriteWords = database.favoriteWordDao().getFavoritesByUser(userEmail);
             runOnUiThread(() -> {
                 if (favoriteWords.isEmpty()) {

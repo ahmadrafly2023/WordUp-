@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:layout_marginBottom="24dp"
-            android:text="Benar! Bagus sekali."
+            android:text="Right! Very good."
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#4CAF50"
